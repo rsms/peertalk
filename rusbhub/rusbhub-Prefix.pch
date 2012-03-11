@@ -1,0 +1,7 @@
+//
+// Prefix header for all source files of the 'rusbhub' target in the 'rusbhub' project
+//
+
+#ifdef __OBJC__
+  #import <Cocoa/Cocoa.h>
+#endif
