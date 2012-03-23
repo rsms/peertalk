@@ -146,9 +146,17 @@ typedef struct _RIOFrame {
         return;
       }
       
+      if (!allData || dispatch_data_get_size(allData) < sizeof(RIOFrame)) {
+        if (allData) dispatch_release(allData);
+        callback([[NSError alloc] initWithDomain:@"RIOFrameError" code:0 userInfo:nil], 0, 0, 0);
+        return;
+      }
+      
       RIOFrame *frame = NULL;
       size_t size = 0;
+      
       dispatch_data_t contiguousData = dispatch_data_create_map(allData, (const void **)&frame, &size);
+      dispatch_release(allData);
       if (!contiguousData) {
         callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:ENOMEM userInfo:nil], 0, 0, 0);
         return;
@@ -200,10 +208,15 @@ typedef struct _RIOFrame {
       
       uint8_t *buffer = NULL;
       size_t bufferSize = 0;
-      dispatch_data_t contiguousData = dispatch_data_create_map(allData, (const void **)&buffer, &bufferSize);
-      if (!contiguousData) {
-        callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:ENOMEM userInfo:nil], NULL, NULL, 0);
-        return;
+      dispatch_data_t contiguousData = NULL;
+      
+      if (allData) {
+        contiguousData = dispatch_data_create_map(allData, (const void **)&buffer, &bufferSize);
+        dispatch_release(allData); allData = NULL;
+        if (!contiguousData) {
+          callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:ENOMEM userInfo:nil], NULL, NULL, 0);
+          return;
+        }
       }
       callback(nil, contiguousData, buffer, bufferSize);
       dispatch_release(contiguousData);
