@@ -17,6 +17,8 @@
 		6A88FA61150D61DE00FC3647 /* RIOFrameProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A88FA5D150D61DE00FC3647 /* RIOFrameProtocol.m */; };
 		6A88FA62150D61DE00FC3647 /* RUSBHub.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A88FA5E150D61DE00FC3647 /* RUSBHub.h */; };
 		6A88FA63150D61DE00FC3647 /* RUSBHub.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A88FA5F150D61DE00FC3647 /* RUSBHub.m */; };
+		6ACFD2D6151D36220081ACF5 /* RIOFrameChannel.h in Headers */ = {isa = PBXBuildFile; fileRef = 6ACFD2D4151D36220081ACF5 /* RIOFrameChannel.h */; };
+		6ACFD2D7151D36220081ACF5 /* RIOFrameChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = 6ACFD2D5151D36220081ACF5 /* RIOFrameChannel.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -47,6 +49,8 @@
 		6A88FA5D150D61DE00FC3647 /* RIOFrameProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RIOFrameProtocol.m; sourceTree = "<group>"; };
 		6A88FA5E150D61DE00FC3647 /* RUSBHub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RUSBHub.h; sourceTree = "<group>"; };
 		6A88FA5F150D61DE00FC3647 /* RUSBHub.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RUSBHub.m; sourceTree = "<group>"; };
+		6ACFD2D4151D36220081ACF5 /* RIOFrameChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RIOFrameChannel.h; sourceTree = "<group>"; };
+		6ACFD2D5151D36220081ACF5 /* RIOFrameChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RIOFrameChannel.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -117,6 +121,8 @@
 			children = (
 				6A88FA5C150D61DE00FC3647 /* RIOFrameProtocol.h */,
 				6A88FA5D150D61DE00FC3647 /* RIOFrameProtocol.m */,
+				6ACFD2D4151D36220081ACF5 /* RIOFrameChannel.h */,
+				6ACFD2D5151D36220081ACF5 /* RIOFrameChannel.m */,
 				6A88FA5E150D61DE00FC3647 /* RUSBHub.h */,
 				6A88FA5F150D61DE00FC3647 /* RUSBHub.m */,
 			);
@@ -151,6 +157,7 @@
 			files = (
 				6A88FA60150D61DE00FC3647 /* RIOFrameProtocol.h in Headers */,
 				6A88FA62150D61DE00FC3647 /* RUSBHub.h in Headers */,
+				6ACFD2D6151D36220081ACF5 /* RIOFrameChannel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -253,6 +260,7 @@
 			files = (
 				6A88FA61150D61DE00FC3647 /* RIOFrameProtocol.m in Sources */,
 				6A88FA63150D61DE00FC3647 /* RUSBHub.m in Sources */,
+				6ACFD2D7151D36220081ACF5 /* RIOFrameChannel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};

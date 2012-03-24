@@ -38,9 +38,7 @@ typedef enum {
   RUSBHubErrorConnectionRefused = 3,
 } RUSBHubError;
 
-@interface RUSBHub : NSObject {
-  id channel_;
-}
+@interface RUSBHub : NSObject
 
 // Shared, implicitly opened hub.
 + (RUSBHub*)sharedHub;

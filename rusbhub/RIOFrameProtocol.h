@@ -11,22 +11,24 @@
 // - Each frame can have application-specific data of up to UINT32_MAX size.
 // - Transactions style messaging can be modeled on top using frame tags.
 // - Lightweight API on top of libdispatch (aka GCD) -- close to the metal.
-// - 
 //
 #include <dispatch/dispatch.h>
 
-static const uint32_t RIOFrameVersion1 = 1;
+// Special frame tag that signifies "no tag". Your implementation should never
+// create a reply for a frame with this tag.
 static const uint32_t RIOFrameNoTag = 0;
+
+// Special frame type that signifies that the stream has ended.
 static const uint32_t RIOFrameTypeEndOfStream = 0;
 
-@interface RIOFrameProtocol : NSObject {
-  dispatch_queue_t queue_;
-  uint32_t nextFrameTag_;
-}
 
-// Queue on which to run data processing blocks. Can be reassigned at any point
-// in time.
+@interface RIOFrameProtocol : NSObject
+
+// Queue on which to run data processing blocks.
 @property dispatch_queue_t queue;
+
+// Get the shared protocol object for *queue*
++ (RIOFrameProtocol*)sharedProtocolForQueue:(dispatch_queue_t)queue;
 
 // Initialize a new protocol object to use a specific queue.
 - (id)initWithDispatchQueue:(dispatch_queue_t)queue;

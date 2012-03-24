@@ -1,5 +1,7 @@
 #import "RIOFrameProtocol.h"
 
+static const uint32_t RIOFrameVersion1 = 1;
+
 // This is what we send as the header for each frame.
 typedef struct _RIOFrame {
   // The version of the frame and protocol.
@@ -20,25 +22,58 @@ typedef struct _RIOFrame {
 } RIOFrame;
 
 
-@interface RIOFrameProtocol (Private)
+@interface RIOFrameProtocol () {
+  uint32_t nextFrameTag_;
+  @public
+  dispatch_queue_t queue_;
+}
 - (dispatch_data_t)createDispatchDataWithFrameOfType:(uint32_t)type frameTag:(uint32_t)frameTag payload:(dispatch_data_t)payload;
+@end
+
+
+static void _release_queue_local_protocol(void *objcobj) {
+  if (objcobj) {
+    RIOFrameProtocol *protocol = (__bridge_transfer id)objcobj;
+    protocol->queue_ = NULL;
+  }
+}
+
+
+@interface RQueueLocalIOFrameProtocol : RIOFrameProtocol
+@end
+@implementation RQueueLocalIOFrameProtocol
+- (void)setQueue:(dispatch_queue_t)queue {
+}
 @end
 
 
 @implementation RIOFrameProtocol
 
+
++ (RIOFrameProtocol*)sharedProtocolForQueue:(dispatch_queue_t)queue {
+  static const char currentQueueFrameProtocolKey;
+  //dispatch_queue_t queue = dispatch_get_current_queue();
+  RIOFrameProtocol *currentQueueFrameProtocol = (__bridge RIOFrameProtocol*)dispatch_queue_get_specific(queue, &currentQueueFrameProtocolKey);
+  if (!currentQueueFrameProtocol) {
+    currentQueueFrameProtocol = [[RQueueLocalIOFrameProtocol alloc] initWithDispatchQueue:NULL];
+    currentQueueFrameProtocol->queue_ = queue; // reference, no retain, since we would create cyclic references
+    dispatch_queue_set_specific(queue, &currentQueueFrameProtocolKey, (__bridge_retained void*)currentQueueFrameProtocol, &_release_queue_local_protocol);
+    return (__bridge RIOFrameProtocol*)dispatch_queue_get_specific(queue, &currentQueueFrameProtocolKey); // to avoid race conds
+  } else {
+    return currentQueueFrameProtocol;
+  }
+}
+
+
 - (id)initWithDispatchQueue:(dispatch_queue_t)queue {
   if (!(self = [super init])) return nil;
   queue_ = queue;
-  dispatch_retain(queue_);
+  if (queue_) dispatch_retain(queue_);
   return self;
 }
 
 - (id)init {
-  if (!(self = [super init])) return nil;
-  queue_ = dispatch_get_current_queue();
-  dispatch_retain(queue_);
-  return self;
+  return [self initWithDispatchQueue:dispatch_get_current_queue()];
 }
 
 - (void)dealloc {
@@ -219,7 +254,7 @@ typedef struct _RIOFrame {
         }
       }
       callback(nil, contiguousData, buffer, bufferSize);
-      dispatch_release(contiguousData);
+      if (contiguousData) dispatch_release(contiguousData);
     }
   });
 }

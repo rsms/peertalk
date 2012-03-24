@@ -163,7 +163,9 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 @end
 
 
-@interface RUSBHub (Private)
+@interface RUSBHub () {
+  RUSBChannel *channel_;
+}
 - (void)handleBroadcastPacket:(NSDictionary*)packet;
 @end
 
@@ -199,10 +201,9 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
     return;
   }
   channel_ = [RUSBChannel new];
-  RUSBChannel *channel = channel_;
   NSError *error = nil;
-  if ([channel openOnQueue:queue error:&error onEnd:onEnd]) {
-    [channel listenWithBroadcastHandler:^(NSDictionary *packet) { [self handleBroadcastPacket:packet]; } callback:onStart];
+  if ([channel_ openOnQueue:queue error:&error onEnd:onEnd]) {
+    [channel_ listenWithBroadcastHandler:^(NSDictionary *packet) { [self handleBroadcastPacket:packet]; } callback:onStart];
   } else if (onStart) {
     onStart(error);
   }
