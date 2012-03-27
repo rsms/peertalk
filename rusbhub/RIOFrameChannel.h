@@ -4,9 +4,11 @@
 //
 #import <Foundation/Foundation.h>
 #import <dispatch/dispatch.h>
+#import <netinet/in.h>
+#import <sys/socket.h>
+
 #import "RIOFrameProtocol.h"
 #import "RUSBHub.h"
-#import <netinet/in.h>
 
 @class RIOData;
 @protocol RIOFrameChannelDelegate;
@@ -14,8 +16,9 @@
 @interface RIOFrameChannel : NSObject
 
 @property RIOFrameProtocol *protocol;
-@property (readonly) dispatch_io_t readingFromDispatchChannel;
 @property (strong) id<RIOFrameChannelDelegate> delegate;
+@property (readonly) BOOL isListening; // YES if this channel is a listening server
+@property (readonly) BOOL isConnected; // YES if this channel is a connected peer
 
 // These block callbacks can be used as an alternative to providing a delegate.
 // You can not use a delegate AND provide block callbacks. E.g. setting a
@@ -23,6 +26,7 @@
 // events to the block and never call the delegate.
 @property (copy) BOOL(^shouldAcceptFrame)(RIOFrameChannel *channel, uint32_t type, uint32_t tag, uint32_t payloadSize);
 @property (copy) void(^onFrame)(RIOFrameChannel *channel, uint32_t type, uint32_t tag, RIOData *payload);
+@property (copy) void(^onAccept)(RIOFrameChannel *serverChannel, RIOFrameChannel *channel);
 @property (copy) void(^onEnd)(RIOFrameChannel *channel, NSError *error);
 
 // Create a new channel initialized with delegate=*delegate*.
@@ -49,7 +53,12 @@
 
 // Connect to a TCP port at IPv4 address. INADDR_LOOPBACK can be used as address
 // to connect to the local host.
-- (void)connectToPort:(in_port_t)port atIPv4Address:(in_addr_t)address callback:(void(^)(NSError *error))callback;
+- (void)connectToPort:(in_port_t)port IPv4Address:(in_addr_t)address callback:(void(^)(NSError *error))callback;
+
+// Listen for connections on port and address, effectively starting a socket
+// server. For this to make sense, you should provide a onAccept block handler
+// or a delegate implementing ioFrameChannel:didAcceptConnection:.
+- (void)listenOnPort:(in_port_t)port IPv4Address:(in_addr_t)address callback:(void(^)(NSError *error))callback;
 
 // Send a frame with an optional payload and optional callback.
 // If *callback* is not NULL, the block is invoked when either an error occured
@@ -79,18 +88,21 @@
 // Protocol for RIOFrameChannel delegates
 @protocol RIOFrameChannelDelegate <NSObject>
 
-@optional
-// Invoked to accept an incoming frame on a channel. Reply NO ignore the
-// incoming frame. If not implemented by the delegate, all frames are accepted.
-- (BOOL)ioFrameChannel:(RIOFrameChannel*)channel shouldAcceptFrameOfType:(uint32_t)type tag:(uint32_t)tag payloadSize:(uint32_t)payloadSize;
-
 @required
 // Invoked when a new frame has arrived on a channel.
 - (void)ioFrameChannel:(RIOFrameChannel*)channel didReceiveFrameOfType:(uint32_t)type tag:(uint32_t)tag payload:(RIOData*)payload;
 
 @optional
+// Invoked to accept an incoming frame on a channel. Reply NO ignore the
+// incoming frame. If not implemented by the delegate, all frames are accepted.
+- (BOOL)ioFrameChannel:(RIOFrameChannel*)channel shouldAcceptFrameOfType:(uint32_t)type tag:(uint32_t)tag payloadSize:(uint32_t)payloadSize;
+
 // Invoked when the channel closed. If it closed because of an error, *error* is
 // a non-nil NSError object.
 - (void)ioFrameChannel:(RIOFrameChannel*)channel didEndWithError:(NSError*)error;
+
+// For listening channels, this method is invoked when a new connection has been
+// accepted.
+- (void)ioFrameChannel:(RIOFrameChannel*)serverChannel didAcceptConnection:(RIOFrameChannel*)channel;
 
 @end
