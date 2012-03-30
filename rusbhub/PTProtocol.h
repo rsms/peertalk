@@ -1,5 +1,5 @@
 //
-// A universal frame-based network protocol which can be used to exchange
+// A universal frame-based communication protocol which can be used to exchange
 // arbitrary structured data.
 //
 // In short:
@@ -16,19 +16,19 @@
 
 // Special frame tag that signifies "no tag". Your implementation should never
 // create a reply for a frame with this tag.
-static const uint32_t RIOFrameNoTag = 0;
+static const uint32_t PTFrameNoTag = 0;
 
 // Special frame type that signifies that the stream has ended.
-static const uint32_t RIOFrameTypeEndOfStream = 0;
+static const uint32_t PTFrameTypeEndOfStream = 0;
 
 
-@interface RIOFrameProtocol : NSObject
+@interface PTProtocol : NSObject
 
 // Queue on which to run data processing blocks.
 @property dispatch_queue_t queue;
 
 // Get the shared protocol object for *queue*
-+ (RIOFrameProtocol*)sharedProtocolForQueue:(dispatch_queue_t)queue;
++ (PTProtocol*)sharedProtocolForQueue:(dispatch_queue_t)queue;
 
 // Initialize a new protocol object to use a specific queue.
 - (id)initWithDispatchQueue:(dispatch_queue_t)queue;
@@ -56,7 +56,7 @@ static const uint32_t RIOFrameTypeEndOfStream = 0;
 // The onFrame handler is responsible for reading (or discarding) any payload
 // and call *resumeReadingFrames* afterwards to resume reading frames.
 // To stop reading frames, simply do not invoke *resumeReadingFrames*.
-// When the stream ends, a frame of type RIOFrameTypeEndOfStream is received.
+// When the stream ends, a frame of type PTFrameTypeEndOfStream is received.
 - (void)readFramesOverChannel:(dispatch_io_t)channel
                       onFrame:(void(^)(NSError *error,
                                        uint32_t type,
@@ -64,7 +64,7 @@ static const uint32_t RIOFrameTypeEndOfStream = 0;
                                        uint32_t payloadSize,
                                        dispatch_block_t resumeReadingFrames))onFrame;
 
-// Read a single frame over *channel*. A frame of type RIOFrameTypeEndOfStream
+// Read a single frame over *channel*. A frame of type PTFrameTypeEndOfStream
 // denotes the stream has ended.
 - (void)readFrameOverChannel:(dispatch_io_t)channel
                     callback:(void(^)(NSError *error,
@@ -94,7 +94,7 @@ static const uint32_t RIOFrameTypeEndOfStream = 0;
 
 @end
 
-@interface NSData (RIOFrameProtocol)
+@interface NSData (PTProtocol)
 // Creates a new dispatch_data_t object which references the receiver and uses
 // the receivers bytes as its backing data. The returned dispatch_data_t object
 // holds a reference to the recevier. It's the callers responsibility to call
@@ -102,8 +102,8 @@ static const uint32_t RIOFrameTypeEndOfStream = 0;
 - (dispatch_data_t)createReferencingDispatchData;
 @end
 
-@interface NSDictionary (RIOFrameProtocol)
-// See description of -[NSData(RIOFrameProtocol) createReferencingDispatchData]
+@interface NSDictionary (PTProtocol)
+// See description of -[NSData(PTProtocol) createReferencingDispatchData]
 - (dispatch_data_t)createReferencingDispatchData;
 
 // Decode *data* as a peroperty list-encoded dictionary. Returns nil on failure.

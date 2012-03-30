@@ -1,11 +1,11 @@
-#import "RIOFrameChannel.h"
+#import "PTChannel.h"
 
 #include <sys/ioctl.h>
 #include <sys/un.h>
 #include <err.h>
 #include <fcntl.h>
 
-@implementation RIOData
+@implementation PTData
 
 @synthesize dispatchData = dispatchData_;
 @synthesize data = data_;
@@ -34,19 +34,19 @@
 #define kConnStateListening 3
 
 
-@interface RIOFrameChannel () {
+@interface PTChannel () {
   union dispatchObj {
     dispatch_io_t channel;
     dispatch_source_t source;
   } dispatchObj_;
-  id<RIOFrameChannelDelegate> delegate_;
+  id<PTChannelDelegate> delegate_;
   char connState_;
 }
-- (id)initWithProtocol:(RIOFrameProtocol*)protocol delegate:(id<RIOFrameChannelDelegate>)delegate;
+- (id)initWithProtocol:(PTProtocol*)protocol delegate:(id<PTChannelDelegate>)delegate;
 - (BOOL)acceptIncomingConnection:(dispatch_fd_t)serverSocketFD;
 @end
 
-@implementation RIOFrameChannel
+@implementation PTChannel
 
 @synthesize protocol = protocol_;
 
@@ -56,12 +56,12 @@
 @synthesize onAccept = onAccept_;
 
 
-+ (RIOFrameChannel*)channelWithDelegate:(id<RIOFrameChannelDelegate>)delegate {
-  return [[RIOFrameChannel alloc] initWithProtocol:[RIOFrameProtocol sharedProtocolForQueue:dispatch_get_current_queue()] delegate:delegate];
++ (PTChannel*)channelWithDelegate:(id<PTChannelDelegate>)delegate {
+  return [[PTChannel alloc] initWithProtocol:[PTProtocol sharedProtocolForQueue:dispatch_get_current_queue()] delegate:delegate];
 }
 
 
-- (id)initWithProtocol:(RIOFrameProtocol*)protocol delegate:(id<RIOFrameChannelDelegate>)delegate {
+- (id)initWithProtocol:(PTProtocol*)protocol delegate:(id<PTChannelDelegate>)delegate {
   if (!(self = [super init])) return nil;
   protocol_ = protocol;
   self.delegate = delegate;
@@ -69,7 +69,7 @@
 }
 
 
-- (id)initWithProtocol:(RIOFrameProtocol*)protocol {
+- (id)initWithProtocol:(PTProtocol*)protocol {
   if (!(self = [super init])) return nil;
   protocol_ = protocol;
   return self;
@@ -77,7 +77,7 @@
 
 
 - (id)init {
-  return [self initWithProtocol:[RIOFrameProtocol sharedProtocolForQueue:dispatch_get_current_queue()]];
+  return [self initWithProtocol:[PTProtocol sharedProtocolForQueue:dispatch_get_current_queue()]];
 }
 
 
@@ -130,16 +130,16 @@
 }
 
 
-- (id<RIOFrameChannelDelegate>)delegate {
+- (id<PTChannelDelegate>)delegate {
   return delegate_;
 }
 
 
-- (void)setDelegate:(id<RIOFrameChannelDelegate>)delegate {
+- (void)setDelegate:(id<PTChannelDelegate>)delegate {
   delegate_ = delegate;
   
   if (delegate_) {
-    self.onFrame = ^(RIOFrameChannel *channel, uint32_t type, uint32_t tag, RIOData *payload) {
+    self.onFrame = ^(PTChannel *channel, uint32_t type, uint32_t tag, PTData *payload) {
       [delegate ioFrameChannel:channel didReceiveFrameOfType:type tag:tag payload:payload];
     };
   } else {
@@ -147,7 +147,7 @@
   }
   
   if (delegate_ && [delegate respondsToSelector:@selector(ioFrameChannel:shouldAcceptFrameOfType:tag:payloadSize:)]) {
-    self.shouldAcceptFrame = ^BOOL(RIOFrameChannel *channel, uint32_t type, uint32_t tag, uint32_t payloadSize) {
+    self.shouldAcceptFrame = ^BOOL(PTChannel *channel, uint32_t type, uint32_t tag, uint32_t payloadSize) {
       return [delegate ioFrameChannel:channel shouldAcceptFrameOfType:type tag:tag payloadSize:payloadSize];
     };
   } else {
@@ -155,7 +155,7 @@
   }
   
   if (delegate_ && [delegate respondsToSelector:@selector(ioFrameChannel:didEndWithError:)]) {
-    self.onEnd = ^(RIOFrameChannel *channel, NSError *error) {
+    self.onEnd = ^(PTChannel *channel, NSError *error) {
       [delegate ioFrameChannel:channel didEndWithError:error];
     };
   } else {
@@ -163,7 +163,7 @@
   }
   
   if (delegate_ && [delegate respondsToSelector:@selector(ioFrameChannel:didAcceptConnection:)]) {
-    self.onAccept = ^(RIOFrameChannel *serverChannel, RIOFrameChannel *channel) {
+    self.onAccept = ^(PTChannel *serverChannel, PTChannel *channel) {
       [delegate ioFrameChannel:serverChannel didAcceptConnection:channel];
     };
   } else {
@@ -182,7 +182,7 @@
 #pragma mark - Connecting
 
 
-- (void)connectToPort:(int)port overUSBHub:(RUSBHub*)usbHub deviceID:(NSNumber*)deviceID callback:(void(^)(NSError *error))callback {
+- (void)connectToPort:(int)port overUSBHub:(PTUSBHub*)usbHub deviceID:(NSNumber*)deviceID callback:(void(^)(NSError *error))callback {
   assert(protocol_ != NULL);
   if (connState_ != kConnStateNone) {
     if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
@@ -252,7 +252,7 @@
   
   if (!dispatchChannel) {
     close(fd);
-    if (callback) callback([[NSError alloc] initWithDomain:@"RIOError" code:0 userInfo:nil]);
+    if (callback) callback([[NSError alloc] initWithDomain:@"PTError" code:0 userInfo:nil]);
     return;
   }
   
@@ -362,7 +362,7 @@
   }
   
   if (delegate_ && self.onAccept) {
-    RIOFrameChannel *channel = [[RIOFrameChannel alloc] initWithProtocol:protocol_ delegate:delegate_];
+    PTChannel *channel = [[PTChannel alloc] initWithProtocol:protocol_ delegate:delegate_];
     dispatch_io_t dispatchChannel = dispatch_io_create(DISPATCH_IO_STREAM, clientSocketFD, protocol_.queue, ^(int error) {
       // Important note: This block captures *self*, thus a reference is held to
       // *self* until the fd is truly closed.
@@ -439,7 +439,7 @@
   };
   
   [protocol_ readFramesOverChannel:channel onFrame:^(NSError *error, uint32_t type, uint32_t tag, uint32_t payloadSize, dispatch_block_t resumeReadingFrames) {
-    if (handleError(error, type == RIOFrameTypeEndOfStream)) {
+    if (handleError(error, type == PTFrameTypeEndOfStream)) {
       return;
     }
     
@@ -467,7 +467,7 @@
           }
           
           if (onFrame_) {
-            RIOData *payload = [[RIOData alloc] initWithMappedDispatchData:contiguousData data:(void*)buffer length:bufferSize];
+            PTData *payload = [[PTData alloc] initWithMappedDispatchData:contiguousData data:(void*)buffer length:bufferSize];
             onFrame_(self, type, tag, payload);
           }
           
@@ -494,16 +494,16 @@
 #pragma mark - NSObject
 
 - (NSString*)description {
-  return [NSString stringWithFormat:@"<RIOFrameChannel: %p (%@) %@>", self, (  connState_ == kConnStateConnecting ? @"connecting"
-                                                                             : connState_ == kConnStateConnected  ? @"connected" 
-                                                                             : connState_ == kConnStateListening  ? @"listening"
-                                                                             :                                      @"closed"), protocol_];
+  return [NSString stringWithFormat:@"<PTChannel: %p (%@) %@>", self, (  connState_ == kConnStateConnecting ? @"connecting"
+                                                                       : connState_ == kConnStateConnected  ? @"connected" 
+                                                                       : connState_ == kConnStateListening  ? @"listening"
+                                                                       :                                      @"closed"), protocol_];
 }
 
 
 @end
 
 
-@implementation RIODeviceFrameChannel
+@implementation PTDeviceChannel
 @synthesize deviceID = deviceID_;
 @end

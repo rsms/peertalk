@@ -2,7 +2,7 @@
 
 // RUSBDeviceDidAttachNotification
 // Posted when a device has been attached. Also posted for each device that is
-// already attached when the RUSBHub starts listening.
+// already attached when the PTUSBHub starts listening.
 //
 //  .userInfo = {
 //    DeviceID = 3;
@@ -30,18 +30,18 @@ NSString *RUSBDeviceDidAttachNotification;
 NSString *RUSBDeviceDidDetachNotification;
 
 // NSError domain
-NSString *RUSBHubErrorDomain;
+NSString *PTUSBHubErrorDomain;
 
-// Error codes returned with NSError.code for NSError domain RUSBHubErrorDomain
+// Error codes returned with NSError.code for NSError domain PTUSBHubErrorDomain
 typedef enum {
-  RUSBHubErrorBadDevice = 2,
-  RUSBHubErrorConnectionRefused = 3,
-} RUSBHubError;
+  PTUSBHubErrorBadDevice = 2,
+  PTUSBHubErrorConnectionRefused = 3,
+} PTUSBHubError;
 
-@interface RUSBHub : NSObject
+@interface PTUSBHub : NSObject
 
 // Shared, implicitly opened hub.
-+ (RUSBHub*)sharedHub;
++ (PTUSBHub*)sharedHub;
 
 // Connect to a TCP *port* on a device, while the actual transport is over USB.
 // Upon success, *error* is nil and *channel* is a duplex I/O channel.

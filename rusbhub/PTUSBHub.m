@@ -1,4 +1,4 @@
-#import "RUSBHub.h"
+#import "PTUSBHub.h"
 
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -6,7 +6,7 @@
 #include <sys/un.h>
 #include <err.h>
 
-NSString *RUSBHubErrorDomain = @"RUSBHubError";
+NSString *PTUSBHubErrorDomain = @"PTUSBHubError";
 
 typedef uint32_t USBMuxPacketType;
 enum {
@@ -107,10 +107,10 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 // Represents a channel of communication between the host process and a remote
 // (device) system. In practice, a RUSBChannel is connected to a usbmuxd
 // endpoint which is configured to either listen for device changes (the
-// RUSBHub's channel is usually configured as a device notification listener) or
-// configured as a TCP bridge (e.g. channels returned from RUSBHub's
+// PTUSBHub's channel is usually configured as a device notification listener) or
+// configured as a TCP bridge (e.g. channels returned from PTUSBHub's
 // connectToDevice:port:callback:). You should not create channels yourself, but
-// let RUSBHub provide you with already configured channels.
+// let PTUSBHub provide you with already configured channels.
 @interface RUSBChannel : NSObject {
   dispatch_io_t channel_;
   dispatch_queue_t queue_;
@@ -163,24 +163,24 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 @end
 
 
-@interface RUSBHub () {
+@interface PTUSBHub () {
   RUSBChannel *channel_;
 }
 - (void)handleBroadcastPacket:(NSDictionary*)packet;
 @end
 
 
-@implementation RUSBHub
+@implementation PTUSBHub
 
 
-+ (RUSBHub*)sharedHub {
-  static RUSBHub *gSharedHub;
++ (PTUSBHub*)sharedHub {
+  static PTUSBHub *gSharedHub;
   static dispatch_once_t onceToken;
   dispatch_once(&onceToken, ^{
-    gSharedHub = [RUSBHub new];
+    gSharedHub = [PTUSBHub new];
     [gSharedHub listenOnQueue:dispatch_get_main_queue() onStart:^(NSError *error) {
       if (error) {
-        NSLog(@"RUSBHub failed to initialize: %@", error);
+        NSLog(@"PTUSBHub failed to initialize: %@", error);
       }
     } onEnd:nil];
   });
@@ -378,7 +378,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
     NSNumber *n = [packet objectForKey:@"Number"];
     
     if (!n) {
-      *error = [NSError errorWithDomain:RUSBHubErrorDomain code:(n ? n.integerValue : 0) userInfo:nil];
+      *error = [NSError errorWithDomain:PTUSBHubErrorDomain code:(n ? n.integerValue : 0) userInfo:nil];
       return NO;
     }
     
@@ -392,7 +392,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
         case USBMuxReplyCodeBadVersion: errmessage = @"invalid version"; break;
         default: break;
       }
-      *error = [NSError errorWithDomain:RUSBHubErrorDomain code:replyCode userInfo:[NSDictionary dictionaryWithObject:errmessage forKey:NSLocalizedDescriptionKey]];
+      *error = [NSError errorWithDomain:PTUSBHubErrorDomain code:replyCode userInfo:[NSDictionary dictionaryWithObject:errmessage forKey:NSLocalizedDescriptionKey]];
       return NO;
     }
   }
@@ -513,14 +513,14 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
       
       // We only support plist protocol
       if (upacket->protocol != USBMuxPacketProtocolPlist) {
-        callback([[NSError alloc] initWithDomain:RUSBHubErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:@"Unexpected package protocol" forKey:NSLocalizedDescriptionKey]], nil, upacket->tag);
+        callback([[NSError alloc] initWithDomain:PTUSBHubErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:@"Unexpected package protocol" forKey:NSLocalizedDescriptionKey]], nil, upacket->tag);
         usbmux_packet_free(upacket);
         return;
       }
       
       // Only one type of packet in the plist protocol
       if (upacket->type != USBMuxPacketTypePlistPayload) {
-        callback([[NSError alloc] initWithDomain:RUSBHubErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:@"Unexpected package type" forKey:NSLocalizedDescriptionKey]], nil, upacket->tag);
+        callback([[NSError alloc] initWithDomain:PTUSBHubErrorDomain code:0 userInfo:[NSDictionary dictionaryWithObject:@"Unexpected package type" forKey:NSLocalizedDescriptionKey]], nil, upacket->tag);
         usbmux_packet_free(upacket);
         return;
       }

@@ -10,15 +10,15 @@
 		6A88FA34150D613800FC3647 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A88FA33150D613800FC3647 /* Cocoa.framework */; };
 		6A88FA46150D613800FC3647 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A88FA45150D613800FC3647 /* SenTestingKit.framework */; };
 		6A88FA47150D613800FC3647 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A88FA33150D613800FC3647 /* Cocoa.framework */; };
-		6A88FA4A150D613800FC3647 /* librusbhub.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A88FA30150D613800FC3647 /* librusbhub.a */; };
+		6A88FA4A150D613800FC3647 /* libpeertalk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A88FA30150D613800FC3647 /* libpeertalk.a */; };
 		6A88FA50150D613800FC3647 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6A88FA4E150D613800FC3647 /* InfoPlist.strings */; };
-		6A88FA53150D613800FC3647 /* RIOFrameProtocolTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A88FA52150D613800FC3647 /* RIOFrameProtocolTests.m */; };
-		6A88FA60150D61DE00FC3647 /* RIOFrameProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A88FA5C150D61DE00FC3647 /* RIOFrameProtocol.h */; };
-		6A88FA61150D61DE00FC3647 /* RIOFrameProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A88FA5D150D61DE00FC3647 /* RIOFrameProtocol.m */; };
-		6A88FA62150D61DE00FC3647 /* RUSBHub.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A88FA5E150D61DE00FC3647 /* RUSBHub.h */; };
-		6A88FA63150D61DE00FC3647 /* RUSBHub.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A88FA5F150D61DE00FC3647 /* RUSBHub.m */; };
-		6ACFD2D6151D36220081ACF5 /* RIOFrameChannel.h in Headers */ = {isa = PBXBuildFile; fileRef = 6ACFD2D4151D36220081ACF5 /* RIOFrameChannel.h */; };
-		6ACFD2D7151D36220081ACF5 /* RIOFrameChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = 6ACFD2D5151D36220081ACF5 /* RIOFrameChannel.m */; };
+		6A88FA53150D613800FC3647 /* PTProtocolTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A88FA52150D613800FC3647 /* PTProtocolTests.m */; };
+		6A88FA60150D61DE00FC3647 /* PTProtocol.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A88FA5C150D61DE00FC3647 /* PTProtocol.h */; };
+		6A88FA61150D61DE00FC3647 /* PTProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A88FA5D150D61DE00FC3647 /* PTProtocol.m */; };
+		6A88FA62150D61DE00FC3647 /* PTUSBHub.h in Headers */ = {isa = PBXBuildFile; fileRef = 6A88FA5E150D61DE00FC3647 /* PTUSBHub.h */; };
+		6A88FA63150D61DE00FC3647 /* PTUSBHub.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A88FA5F150D61DE00FC3647 /* PTUSBHub.m */; };
+		6ACFD2D6151D36220081ACF5 /* PTChannel.h in Headers */ = {isa = PBXBuildFile; fileRef = 6ACFD2D4151D36220081ACF5 /* PTChannel.h */; };
+		6ACFD2D7151D36220081ACF5 /* PTChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = 6ACFD2D5151D36220081ACF5 /* PTChannel.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -33,24 +33,24 @@
 
 /* Begin PBXFileReference section */
 		6A0A056E150DB1C10014D424 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		6A88FA30150D613800FC3647 /* librusbhub.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = librusbhub.a; sourceTree = BUILT_PRODUCTS_DIR; };
+		6A88FA30150D613800FC3647 /* libpeertalk.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = libpeertalk.a; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A88FA33150D613800FC3647 /* Cocoa.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Cocoa.framework; path = System/Library/Frameworks/Cocoa.framework; sourceTree = SDKROOT; };
 		6A88FA36150D613800FC3647 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		6A88FA37150D613800FC3647 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		6A88FA38150D613800FC3647 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		6A88FA3B150D613800FC3647 /* rusbhub-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "rusbhub-Prefix.pch"; sourceTree = "<group>"; };
-		6A88FA44150D613800FC3647 /* rusbhubTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = rusbhubTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6A88FA3B150D613800FC3647 /* peertalk-Prefix.pch */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = "peertalk-Prefix.pch"; sourceTree = "<group>"; };
+		6A88FA44150D613800FC3647 /* peertalkTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = peertalkTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A88FA45150D613800FC3647 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
-		6A88FA4D150D613800FC3647 /* rusbhubTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "rusbhubTests-Info.plist"; sourceTree = "<group>"; };
+		6A88FA4D150D613800FC3647 /* peertalkTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "peertalkTests-Info.plist"; sourceTree = "<group>"; };
 		6A88FA4F150D613800FC3647 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
-		6A88FA51150D613800FC3647 /* RIOFrameProtocolTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = RIOFrameProtocolTests.h; sourceTree = "<group>"; };
-		6A88FA52150D613800FC3647 /* RIOFrameProtocolTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = RIOFrameProtocolTests.m; sourceTree = "<group>"; };
-		6A88FA5C150D61DE00FC3647 /* RIOFrameProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RIOFrameProtocol.h; sourceTree = "<group>"; };
-		6A88FA5D150D61DE00FC3647 /* RIOFrameProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RIOFrameProtocol.m; sourceTree = "<group>"; };
-		6A88FA5E150D61DE00FC3647 /* RUSBHub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RUSBHub.h; sourceTree = "<group>"; };
-		6A88FA5F150D61DE00FC3647 /* RUSBHub.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RUSBHub.m; sourceTree = "<group>"; };
-		6ACFD2D4151D36220081ACF5 /* RIOFrameChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RIOFrameChannel.h; sourceTree = "<group>"; };
-		6ACFD2D5151D36220081ACF5 /* RIOFrameChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RIOFrameChannel.m; sourceTree = "<group>"; };
+		6A88FA51150D613800FC3647 /* PTProtocolTests.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = PTProtocolTests.h; sourceTree = "<group>"; };
+		6A88FA52150D613800FC3647 /* PTProtocolTests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = PTProtocolTests.m; sourceTree = "<group>"; };
+		6A88FA5C150D61DE00FC3647 /* PTProtocol.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PTProtocol.h; sourceTree = "<group>"; };
+		6A88FA5D150D61DE00FC3647 /* PTProtocol.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PTProtocol.m; sourceTree = "<group>"; };
+		6A88FA5E150D61DE00FC3647 /* PTUSBHub.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PTUSBHub.h; sourceTree = "<group>"; };
+		6A88FA5F150D61DE00FC3647 /* PTUSBHub.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PTUSBHub.m; sourceTree = "<group>"; };
+		6ACFD2D4151D36220081ACF5 /* PTChannel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = PTChannel.h; sourceTree = "<group>"; };
+		6ACFD2D5151D36220081ACF5 /* PTChannel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = PTChannel.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -68,7 +68,7 @@
 			files = (
 				6A88FA46150D613800FC3647 /* SenTestingKit.framework in Frameworks */,
 				6A88FA47150D613800FC3647 /* Cocoa.framework in Frameworks */,
-				6A88FA4A150D613800FC3647 /* librusbhub.a in Frameworks */,
+				6A88FA4A150D613800FC3647 /* libpeertalk.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -78,7 +78,7 @@
 		6A88FA25150D613800FC3647 = {
 			isa = PBXGroup;
 			children = (
-				6A88FA3B150D613800FC3647 /* rusbhub-Prefix.pch */,
+				6A88FA3B150D613800FC3647 /* peertalk-Prefix.pch */,
 				6A88FA39150D613800FC3647 /* rusbhub */,
 				6A88FA4B150D613800FC3647 /* rusbhubTests */,
 				6A88FA32150D613800FC3647 /* Frameworks */,
@@ -89,8 +89,8 @@
 		6A88FA31150D613800FC3647 /* Products */ = {
 			isa = PBXGroup;
 			children = (
-				6A88FA30150D613800FC3647 /* librusbhub.a */,
-				6A88FA44150D613800FC3647 /* rusbhubTests.octest */,
+				6A88FA30150D613800FC3647 /* libpeertalk.a */,
+				6A88FA44150D613800FC3647 /* peertalkTests.octest */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -119,12 +119,12 @@
 		6A88FA39150D613800FC3647 /* rusbhub */ = {
 			isa = PBXGroup;
 			children = (
-				6A88FA5C150D61DE00FC3647 /* RIOFrameProtocol.h */,
-				6A88FA5D150D61DE00FC3647 /* RIOFrameProtocol.m */,
-				6ACFD2D4151D36220081ACF5 /* RIOFrameChannel.h */,
-				6ACFD2D5151D36220081ACF5 /* RIOFrameChannel.m */,
-				6A88FA5E150D61DE00FC3647 /* RUSBHub.h */,
-				6A88FA5F150D61DE00FC3647 /* RUSBHub.m */,
+				6ACFD2D4151D36220081ACF5 /* PTChannel.h */,
+				6ACFD2D5151D36220081ACF5 /* PTChannel.m */,
+				6A88FA5C150D61DE00FC3647 /* PTProtocol.h */,
+				6A88FA5D150D61DE00FC3647 /* PTProtocol.m */,
+				6A88FA5E150D61DE00FC3647 /* PTUSBHub.h */,
+				6A88FA5F150D61DE00FC3647 /* PTUSBHub.m */,
 			);
 			path = rusbhub;
 			sourceTree = "<group>";
@@ -132,8 +132,8 @@
 		6A88FA4B150D613800FC3647 /* rusbhubTests */ = {
 			isa = PBXGroup;
 			children = (
-				6A88FA51150D613800FC3647 /* RIOFrameProtocolTests.h */,
-				6A88FA52150D613800FC3647 /* RIOFrameProtocolTests.m */,
+				6A88FA51150D613800FC3647 /* PTProtocolTests.h */,
+				6A88FA52150D613800FC3647 /* PTProtocolTests.m */,
 				6A88FA4C150D613800FC3647 /* Supporting Files */,
 			);
 			path = rusbhubTests;
@@ -142,7 +142,7 @@
 		6A88FA4C150D613800FC3647 /* Supporting Files */ = {
 			isa = PBXGroup;
 			children = (
-				6A88FA4D150D613800FC3647 /* rusbhubTests-Info.plist */,
+				6A88FA4D150D613800FC3647 /* peertalkTests-Info.plist */,
 				6A88FA4E150D613800FC3647 /* InfoPlist.strings */,
 			);
 			name = "Supporting Files";
@@ -155,18 +155,18 @@
 			isa = PBXHeadersBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6A88FA60150D61DE00FC3647 /* RIOFrameProtocol.h in Headers */,
-				6A88FA62150D61DE00FC3647 /* RUSBHub.h in Headers */,
-				6ACFD2D6151D36220081ACF5 /* RIOFrameChannel.h in Headers */,
+				6A88FA60150D61DE00FC3647 /* PTProtocol.h in Headers */,
+				6A88FA62150D61DE00FC3647 /* PTUSBHub.h in Headers */,
+				6ACFD2D6151D36220081ACF5 /* PTChannel.h in Headers */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		6A88FA2F150D613800FC3647 /* rusbhub */ = {
+		6A88FA2F150D613800FC3647 /* peertalk */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6A88FA56150D613800FC3647 /* Build configuration list for PBXNativeTarget "rusbhub" */;
+			buildConfigurationList = 6A88FA56150D613800FC3647 /* Build configuration list for PBXNativeTarget "peertalk" */;
 			buildPhases = (
 				6A88FA2C150D613800FC3647 /* Sources */,
 				6A88FA2D150D613800FC3647 /* Frameworks */,
@@ -176,14 +176,14 @@
 			);
 			dependencies = (
 			);
-			name = rusbhub;
+			name = peertalk;
 			productName = rusbhub;
-			productReference = 6A88FA30150D613800FC3647 /* librusbhub.a */;
+			productReference = 6A88FA30150D613800FC3647 /* libpeertalk.a */;
 			productType = "com.apple.product-type.library.static";
 		};
-		6A88FA43150D613800FC3647 /* rusbhubTests */ = {
+		6A88FA43150D613800FC3647 /* peertalkTests */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 6A88FA59150D613800FC3647 /* Build configuration list for PBXNativeTarget "rusbhubTests" */;
+			buildConfigurationList = 6A88FA59150D613800FC3647 /* Build configuration list for PBXNativeTarget "peertalkTests" */;
 			buildPhases = (
 				6A88FA3F150D613800FC3647 /* Sources */,
 				6A88FA40150D613800FC3647 /* Frameworks */,
@@ -195,9 +195,9 @@
 			dependencies = (
 				6A88FA49150D613800FC3647 /* PBXTargetDependency */,
 			);
-			name = rusbhubTests;
+			name = peertalkTests;
 			productName = rusbhubTests;
-			productReference = 6A88FA44150D613800FC3647 /* rusbhubTests.octest */;
+			productReference = 6A88FA44150D613800FC3647 /* peertalkTests.octest */;
 			productType = "com.apple.product-type.bundle";
 		};
 /* End PBXNativeTarget section */
@@ -208,7 +208,7 @@
 			attributes = {
 				LastUpgradeCheck = 0430;
 			};
-			buildConfigurationList = 6A88FA2A150D613800FC3647 /* Build configuration list for PBXProject "rusbhub" */;
+			buildConfigurationList = 6A88FA2A150D613800FC3647 /* Build configuration list for PBXProject "peertalk" */;
 			compatibilityVersion = "Xcode 3.2";
 			developmentRegion = English;
 			hasScannedForEncodings = 0;
@@ -220,8 +220,8 @@
 			projectDirPath = "";
 			projectRoot = "";
 			targets = (
-				6A88FA2F150D613800FC3647 /* rusbhub */,
-				6A88FA43150D613800FC3647 /* rusbhubTests */,
+				6A88FA2F150D613800FC3647 /* peertalk */,
+				6A88FA43150D613800FC3647 /* peertalkTests */,
 			);
 		};
 /* End PBXProject section */
@@ -258,9 +258,9 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6A88FA61150D61DE00FC3647 /* RIOFrameProtocol.m in Sources */,
-				6A88FA63150D61DE00FC3647 /* RUSBHub.m in Sources */,
-				6ACFD2D7151D36220081ACF5 /* RIOFrameChannel.m in Sources */,
+				6A88FA61150D61DE00FC3647 /* PTProtocol.m in Sources */,
+				6A88FA63150D61DE00FC3647 /* PTUSBHub.m in Sources */,
+				6ACFD2D7151D36220081ACF5 /* PTChannel.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -268,7 +268,7 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6A88FA53150D613800FC3647 /* RIOFrameProtocolTests.m in Sources */,
+				6A88FA53150D613800FC3647 /* PTProtocolTests.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -277,7 +277,7 @@
 /* Begin PBXTargetDependency section */
 		6A88FA49150D613800FC3647 /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 6A88FA2F150D613800FC3647 /* rusbhub */;
+			target = 6A88FA2F150D613800FC3647 /* peertalk */;
 			targetProxy = 6A88FA48150D613800FC3647 /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -345,8 +345,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "rusbhub-Prefix.pch";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				GCC_PREFIX_HEADER = "peertalk-Prefix.pch";
+				PRODUCT_NAME = peertalk;
 			};
 			name = Debug;
 		};
@@ -354,8 +354,8 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "rusbhub-Prefix.pch";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				GCC_PREFIX_HEADER = "peertalk-Prefix.pch";
+				PRODUCT_NAME = peertalk;
 			};
 			name = Release;
 		};
@@ -364,9 +364,9 @@
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "rusbhub-Prefix.pch";
-				INFOPLIST_FILE = "rusbhubTests/rusbhubTests-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				GCC_PREFIX_HEADER = "peertalk-Prefix.pch";
+				INFOPLIST_FILE = "rusbhubTests/peertalkTests-Info.plist";
+				PRODUCT_NAME = peertalkTests;
 				WRAPPER_EXTENSION = octest;
 			};
 			name = Debug;
@@ -376,9 +376,9 @@
 			buildSettings = {
 				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
-				GCC_PREFIX_HEADER = "rusbhub-Prefix.pch";
-				INFOPLIST_FILE = "rusbhubTests/rusbhubTests-Info.plist";
-				PRODUCT_NAME = "$(TARGET_NAME)";
+				GCC_PREFIX_HEADER = "peertalk-Prefix.pch";
+				INFOPLIST_FILE = "rusbhubTests/peertalkTests-Info.plist";
+				PRODUCT_NAME = peertalkTests;
 				WRAPPER_EXTENSION = octest;
 			};
 			name = Release;
@@ -386,7 +386,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		6A88FA2A150D613800FC3647 /* Build configuration list for PBXProject "rusbhub" */ = {
+		6A88FA2A150D613800FC3647 /* Build configuration list for PBXProject "peertalk" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				6A88FA54150D613800FC3647 /* Debug */,
@@ -395,7 +395,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6A88FA56150D613800FC3647 /* Build configuration list for PBXNativeTarget "rusbhub" */ = {
+		6A88FA56150D613800FC3647 /* Build configuration list for PBXNativeTarget "peertalk" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				6A88FA57150D613800FC3647 /* Debug */,
@@ -404,7 +404,7 @@
 			defaultConfigurationIsVisible = 0;
 			defaultConfigurationName = Release;
 		};
-		6A88FA59150D613800FC3647 /* Build configuration list for PBXNativeTarget "rusbhubTests" */ = {
+		6A88FA59150D613800FC3647 /* Build configuration list for PBXNativeTarget "peertalkTests" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				6A88FA5A150D613800FC3647 /* Debug */,

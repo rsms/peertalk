@@ -1,4 +1,4 @@
-# rusbhub
+# peertalk
 
 A small Cocoa library that does two things:
 

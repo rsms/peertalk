@@ -1,4 +1,4 @@
-#import "RIOFrameProtocolTests.h"
+#import "PTProtocolTests.h"
 
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -6,12 +6,12 @@
 #include <sys/un.h>
 #include <err.h>
 
-#define RAssertNotNULL(x) do { if ((x) == NULL) STFail(@"%s == NULL", #x); } while(0)
+#define PTAssertNotNULL(x) do { if ((x) == NULL) STFail(@"%s == NULL", #x); } while(0)
 
-static const uint32_t RIOFrameTypeTestPing = UINT32_MAX - 1;
-static const uint32_t RIOFrameTypeTestPingReply = RIOFrameTypeTestPing - 1;
+static const uint32_t PTFrameTypeTestPing = UINT32_MAX - 1;
+static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
 
-@implementation RIOFrameProtocolTests
+@implementation PTProtocolTests
 
 - (void)setUp {
   [super setUp];
@@ -21,22 +21,22 @@ static const uint32_t RIOFrameTypeTestPingReply = RIOFrameTypeTestPing - 1;
     STFail(@"socketpair");
   }
   
-  queue_[0] = dispatch_queue_create("RIOFrameProtocolTests.queue_[0]", DISPATCH_QUEUE_SERIAL);
-  RAssertNotNULL(queue_[0]);
+  queue_[0] = dispatch_queue_create("PTProtocolTests.queue_[0]", DISPATCH_QUEUE_SERIAL);
+  PTAssertNotNULL(queue_[0]);
   channel_[0] = dispatch_io_create(DISPATCH_IO_STREAM, socket_[0], queue_[0], ^(int error) {
     close(socket_[0]);
   });
-  RAssertNotNULL(channel_[0]);
+  PTAssertNotNULL(channel_[0]);
   
-  queue_[1] = dispatch_queue_create("RIOFrameProtocolTests.queue_[1]", DISPATCH_QUEUE_SERIAL);
-  RAssertNotNULL(queue_[1]);
+  queue_[1] = dispatch_queue_create("PTProtocolTests.queue_[1]", DISPATCH_QUEUE_SERIAL);
+  PTAssertNotNULL(queue_[1]);
   channel_[1] = dispatch_io_create(DISPATCH_IO_STREAM, socket_[1], queue_[1], ^(int error) {
     close(socket_[1]);
   });
-  RAssertNotNULL(channel_[1]);
+  PTAssertNotNULL(channel_[1]);
   
-  protocol_[0] = [[RIOFrameProtocol alloc] initWithDispatchQueue:queue_[0]];
-  protocol_[1] = [[RIOFrameProtocol alloc] initWithDispatchQueue:queue_[1]];
+  protocol_[0] = [[PTProtocol alloc] initWithDispatchQueue:queue_[0]];
+  protocol_[1] = [[PTProtocol alloc] initWithDispatchQueue:queue_[1]];
 }
 
 - (void)tearDown {
@@ -84,12 +84,12 @@ static const uint32_t RIOFrameTypeTestPingReply = RIOFrameTypeTestPing - 1;
     
     if (done) {
       STAssertEquals(error, (int)0, @"Expected error == 0");
-      RAssertNotNULL(allData);
+      PTAssertNotNULL(allData);
       
       uint8_t *buffer = NULL;
       size_t bufferSize = 0;
       dispatch_data_t contiguousData = dispatch_data_create_map(allData, (const void **)&buffer, &bufferSize);
-      RAssertNotNULL(contiguousData);
+      PTAssertNotNULL(contiguousData);
       callback(contiguousData, buffer, bufferSize);
       dispatch_release(contiguousData);
     }
@@ -117,8 +117,8 @@ static const uint32_t RIOFrameTypeTestPingReply = RIOFrameTypeTestPing - 1;
     
     if (expectedPayloadSize != 0) {
       [protocol_[clientIndex] readPayloadOfSize:receivedPayloadSize overChannel:channel_[clientIndex] callback:^(NSError *error, dispatch_data_t contiguousData, const uint8_t *buffer, size_t bufferSize) {
-        RAssertNotNULL(contiguousData);
-        RAssertNotNULL(buffer);
+        PTAssertNotNULL(contiguousData);
+        PTAssertNotNULL(buffer);
         STAssertEquals((uint32_t)bufferSize, receivedPayloadSize, nil);
         callback(contiguousData, buffer, bufferSize);
       }];
@@ -161,16 +161,16 @@ static const uint32_t RIOFrameTypeTestPingReply = RIOFrameTypeTestPing - 1;
 - (void)test2_protocol_transmit_frame {
   dispatch_semaphore_t sem1 = dispatch_semaphore_create(0);
 
-  uint32_t frameTag = RIOFrameNoTag;
+  uint32_t frameTag = PTFrameNoTag;
   uint32_t payloadSize = 0;
 
-  [protocol_[0] sendFrameOfType:RIOFrameTypeTestPing tag:frameTag withPayload:nil overChannel:channel_[0] callback:^(NSError *error) {
+  [protocol_[0] sendFrameOfType:PTFrameTypeTestPing tag:frameTag withPayload:nil overChannel:channel_[0] callback:^(NSError *error) {
     if (error) STFail(@"sendFrameOfType failed: %@", error);
   }];
 
   [protocol_[1] readFrameOverChannel:channel_[1] callback:^(NSError *error, uint32_t receivedFrameType, uint32_t receivedFrameTag, uint32_t receivedPayloadSize) {
     if (error) STFail(@"readFrameOverChannel failed: %@", error);
-    STAssertEquals(receivedFrameType, RIOFrameTypeTestPing, nil);
+    STAssertEquals(receivedFrameType, PTFrameTypeTestPing, nil);
     STAssertEquals(receivedFrameTag, frameTag, nil);
     STAssertEquals(receivedPayloadSize, payloadSize, nil);
     
@@ -188,19 +188,19 @@ static const uint32_t RIOFrameTypeTestPingReply = RIOFrameTypeTestPing - 1;
   uint32_t payloadSize = 0;
   
   // Send frame on channel 0
-  [protocol_[0] sendFrameOfType:RIOFrameTypeTestPing tag:frameTag withPayload:nil overChannel:channel_[0] callback:^(NSError *error) {
+  [protocol_[0] sendFrameOfType:PTFrameTypeTestPing tag:frameTag withPayload:nil overChannel:channel_[0] callback:^(NSError *error) {
     if (error) STFail(@"sendFrameOfType failed: %@", error);
   }];
   
   // Read frame on channel 1
   [protocol_[1] readFrameOverChannel:channel_[1] callback:^(NSError *error, uint32_t receivedFrameType, uint32_t receivedFrameTag, uint32_t receivedPayloadSize) {
     if (error) STFail(@"readFrameOverChannel failed: %@", error);
-    STAssertEquals(receivedFrameType, RIOFrameTypeTestPing, nil);
+    STAssertEquals(receivedFrameType, PTFrameTypeTestPing, nil);
     STAssertEquals(receivedFrameTag, frameTag, nil);
     STAssertEquals(receivedPayloadSize, payloadSize, nil);
     
     // Reply on channel 1
-    [protocol_[1] sendFrameOfType:RIOFrameTypeTestPingReply tag:receivedFrameTag withPayload:nil overChannel:channel_[1] callback:^(NSError *error) {
+    [protocol_[1] sendFrameOfType:PTFrameTypeTestPingReply tag:receivedFrameTag withPayload:nil overChannel:channel_[1] callback:^(NSError *error) {
       if (error) STFail(@"sendFrameOfType failed: %@", error);
     }];
   }];
@@ -208,7 +208,7 @@ static const uint32_t RIOFrameTypeTestPingReply = RIOFrameTypeTestPing - 1;
   // Read reply on channel 0 (we expect a reply)
   [protocol_[0] readFrameOverChannel:channel_[0] callback:^(NSError *error, uint32_t receivedFrameType, uint32_t receivedFrameTag, uint32_t receivedPayloadSize) {
     if (error) STFail(@"readFrameOverChannel failed: %@", error);
-    STAssertEquals(receivedFrameType, RIOFrameTypeTestPingReply, nil);
+    STAssertEquals(receivedFrameType, PTFrameTypeTestPingReply, nil);
     STAssertEquals(receivedFrameTag, frameTag, nil);
     STAssertEquals(receivedPayloadSize, payloadSize, nil);
     // Test case complete
@@ -226,11 +226,11 @@ static const uint32_t RIOFrameTypeTestPingReply = RIOFrameTypeTestPing - 1;
   NSData *payloadData = [textMessage dataUsingEncoding:NSUTF8StringEncoding];
   dispatch_data_t payload = [payloadData createReferencingDispatchData];
   
-  [protocol_[0] sendFrameOfType:RIOFrameTypeTestPing tag:RIOFrameNoTag withPayload:payload overChannel:channel_[0] callback:^(NSError *error) {
+  [protocol_[0] sendFrameOfType:PTFrameTypeTestPing tag:PTFrameNoTag withPayload:payload overChannel:channel_[0] callback:^(NSError *error) {
     if (error) STFail(@"sendFrameOfType failed: %@", error);
   }];
   
-  [self readFrameWithClient:1 expectedFrameType:RIOFrameTypeTestPing expectedFrameTag:RIOFrameNoTag expectedPayloadSize:(uint32_t)dispatch_data_get_size(payload) callback:^(dispatch_data_t contiguousData, const uint8_t *buffer, size_t bufferSize) {
+  [self readFrameWithClient:1 expectedFrameType:PTFrameTypeTestPing expectedFrameTag:PTFrameNoTag expectedPayloadSize:(uint32_t)dispatch_data_get_size(payload) callback:^(dispatch_data_t contiguousData, const uint8_t *buffer, size_t bufferSize) {
     
     if (memcmp((const void *)payloadData.bytes, (const void *)buffer, bufferSize) != 0) {
       STFail(@"Received payload differs from sent payload");
@@ -257,7 +257,7 @@ static const uint32_t RIOFrameTypeTestPingReply = RIOFrameTypeTestPing - 1;
   uint32_t tags[totalNumberOfFrames];
   
   for (int i = 0; i < totalNumberOfFrames; ++i ) {
-    frameTypes[i] = RIOFrameTypeTestPing - i; // note: RIOFrameTypeTest* are adjusted to UINT32_MAX, thus we subtract to avoid overflow
+    frameTypes[i] = PTFrameTypeTestPing - i; // note: PTFrameTypeTest* are adjusted to UINT32_MAX, thus we subtract to avoid overflow
     tags[i] = [protocol_[0] newTag];
     [protocol_[0] sendFrameOfType:frameTypes[i] tag:tags[i] withPayload:nil overChannel:channel_[0] callback:^(NSError *error) {
       if (error) STFail(@"sendFrameOfType failed: %@", error);
@@ -290,8 +290,8 @@ static const uint32_t RIOFrameTypeTestPingReply = RIOFrameTypeTestPing - 1;
   
   // Send all frames on channel 0
   for (int i = 0; i < totalNumberOfFrames; ++i ) {
-    uint32_t frameType = RIOFrameTypeTestPing - i;
-    [frameTypes addObject:[NSNumber numberWithUnsignedInt:frameType]]; // note: RIOFrameTypeTest* are adjusted to UINT32_MAX, thus we subtract to avoid overflow
+    uint32_t frameType = PTFrameTypeTestPing - i;
+    [frameTypes addObject:[NSNumber numberWithUnsignedInt:frameType]]; // note: PTFrameTypeTest* are adjusted to UINT32_MAX, thus we subtract to avoid overflow
     uint32_t tag = [protocol_[0] newTag];
     [tags addObject:[NSNumber numberWithUnsignedInt:tag]];
     
@@ -336,8 +336,8 @@ static const uint32_t RIOFrameTypeTestPingReply = RIOFrameTypeTestPing - 1;
     
     if (payloadSize) {
       [protocol_[1] readPayloadOfSize:payloadSize overChannel:channel_[1] callback:^(NSError *error, dispatch_data_t contiguousData, const uint8_t *buffer, size_t bufferSize) {
-        RAssertNotNULL(contiguousData);
-        RAssertNotNULL(buffer);
+        PTAssertNotNULL(contiguousData);
+        PTAssertNotNULL(buffer);
         STAssertEquals((uint32_t)bufferSize, payloadSize, nil);
         
         if (memcmp((const void *)(expectedPayloadData.bytes), (const void *)buffer, bufferSize) != 0) {
