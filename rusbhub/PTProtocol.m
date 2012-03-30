@@ -2,6 +2,8 @@
 
 static const uint32_t PTProtocolVersion1 = 1;
 
+NSString *PTProtocolErrorDomain = @"PTProtocolError";
+
 // This is what we send as the header for each frame.
 typedef struct _PTFrame {
   // The version of the frame and protocol.
@@ -183,7 +185,7 @@ static void _release_queue_local_protocol(void *objcobj) {
       
       if (!allData || dispatch_data_get_size(allData) < sizeof(PTFrame)) {
         if (allData) dispatch_release(allData);
-        callback([[NSError alloc] initWithDomain:@"PTProtocolError" code:0 userInfo:nil], 0, 0, 0);
+        callback([[NSError alloc] initWithDomain:PTProtocolErrorDomain code:0 userInfo:nil], 0, 0, 0);
         return;
       }
       
@@ -199,7 +201,7 @@ static void _release_queue_local_protocol(void *objcobj) {
       
       frame->version = ntohl(frame->version);
       if (frame->version != PTProtocolVersion1) {
-        callback([[NSError alloc] initWithDomain:@"PTProtocolError" code:0 userInfo:nil], 0, 0, 0);
+        callback([[NSError alloc] initWithDomain:PTProtocolErrorDomain code:0 userInfo:nil], 0, 0, 0);
       } else {
         frame->type = ntohl(frame->type);
         frame->tag = ntohl(frame->tag);

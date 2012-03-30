@@ -29,8 +29,10 @@
 @property (copy) void(^onAccept)(PTChannel *serverChannel, PTChannel *channel);
 @property (copy) void(^onEnd)(PTChannel *channel, NSError *error);
 
-// Create a new channel initialized with delegate=*delegate*.
+// Create a new channel using the shared PTProtocol for the current dispatch
+// queue, with *delegate*.
 + (PTChannel*)channelWithDelegate:(id<PTChannelDelegate>)delegate;
+
 
 // Initialize a new frame channel, configuring it to use the calling queue's
 // protocol instance (as returned by [PTProtocol sharedProtocolForQueue:
@@ -40,7 +42,9 @@
 // Initialize a new frame channel with a specific protocol.
 - (id)initWithProtocol:(PTProtocol*)protocol;
 
-- (BOOL)startReadingFromConnectedChannel:(dispatch_io_t)channel error:(__autoreleasing NSError**)error;
+// Initialize a new frame channel with a specific protocol and delegate.
+- (id)initWithProtocol:(PTProtocol*)protocol delegate:(id<PTChannelDelegate>)delegate;
+
 
 // Connect to a TCP port on a device connected over USB
 - (void)connectToPort:(int)port overUSBHub:(PTUSBHub*)usbHub deviceID:(NSNumber*)deviceID callback:(void(^)(NSError *error))callback;
@@ -59,6 +63,9 @@
 // or when the frame (and payload, if any) has been completely sent.
 - (void)sendFrameOfType:(uint32_t)frameType tag:(uint32_t)tag withPayload:(dispatch_data_t)payload callback:(void(^)(NSError *error))callback;
 
+// Lower-level method to assign a connected dispatch IO channel to this channel
+- (BOOL)startReadingFromConnectedChannel:(dispatch_io_t)channel error:(__autoreleasing NSError**)error;
+
 // Close the channel, preventing further reading and writing. Any ongoing and
 // queued reads and writes will be aborted.
 - (void)close;
@@ -73,7 +80,7 @@
 // A simple subclass used for device-specific channels that contains a device
 // identifier
 @interface PTDeviceChannel : PTChannel
-@property (strong) NSNumber *deviceID;
+@property (strong) id deviceID;
 @end
 
 

@@ -21,6 +21,9 @@ static const uint32_t PTFrameNoTag = 0;
 // Special frame type that signifies that the stream has ended.
 static const uint32_t PTFrameTypeEndOfStream = 0;
 
+// NSError domain
+NSString *PTProtocolErrorDomain;
+
 
 @interface PTProtocol : NSObject
 
