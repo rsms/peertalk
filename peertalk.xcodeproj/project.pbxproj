@@ -79,8 +79,8 @@
 			isa = PBXGroup;
 			children = (
 				6A88FA3B150D613800FC3647 /* peertalk-Prefix.pch */,
-				6A88FA39150D613800FC3647 /* rusbhub */,
-				6A88FA4B150D613800FC3647 /* rusbhubTests */,
+				6A88FA39150D613800FC3647 /* peertalk */,
+				6A88FA4B150D613800FC3647 /* tests */,
 				6A88FA32150D613800FC3647 /* Frameworks */,
 				6A88FA31150D613800FC3647 /* Products */,
 			);
@@ -116,7 +116,7 @@
 			name = "Other Frameworks";
 			sourceTree = "<group>";
 		};
-		6A88FA39150D613800FC3647 /* rusbhub */ = {
+		6A88FA39150D613800FC3647 /* peertalk */ = {
 			isa = PBXGroup;
 			children = (
 				6ACFD2D4151D36220081ACF5 /* PTChannel.h */,
@@ -126,17 +126,18 @@
 				6A88FA5E150D61DE00FC3647 /* PTUSBHub.h */,
 				6A88FA5F150D61DE00FC3647 /* PTUSBHub.m */,
 			);
-			path = rusbhub;
+			path = peertalk;
 			sourceTree = "<group>";
 		};
-		6A88FA4B150D613800FC3647 /* rusbhubTests */ = {
+		6A88FA4B150D613800FC3647 /* tests */ = {
 			isa = PBXGroup;
 			children = (
 				6A88FA51150D613800FC3647 /* PTProtocolTests.h */,
 				6A88FA52150D613800FC3647 /* PTProtocolTests.m */,
 				6A88FA4C150D613800FC3647 /* Supporting Files */,
 			);
-			path = rusbhubTests;
+			name = tests;
+			path = "peertalk-tests";
 			sourceTree = "<group>";
 		};
 		6A88FA4C150D613800FC3647 /* Supporting Files */ = {
@@ -365,7 +366,7 @@
 				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "peertalk-Prefix.pch";
-				INFOPLIST_FILE = "rusbhubTests/peertalkTests-Info.plist";
+				INFOPLIST_FILE = "peertalk-tests/peertalkTests-Info.plist";
 				PRODUCT_NAME = peertalkTests;
 				WRAPPER_EXTENSION = octest;
 			};
@@ -377,7 +378,7 @@
 				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "peertalk-Prefix.pch";
-				INFOPLIST_FILE = "rusbhubTests/peertalkTests-Info.plist";
+				INFOPLIST_FILE = "peertalk-tests/peertalkTests-Info.plist";
 				PRODUCT_NAME = peertalkTests;
 				WRAPPER_EXTENSION = octest;
 			};
