@@ -29,8 +29,9 @@
 @end
 
 #define kConnStateNone 0
-#define kConnStateConnected 1
-#define kConnStateListening 2
+#define kConnStateConnecting 1
+#define kConnStateConnected 2
+#define kConnStateListening 3
 
 
 @interface RIOFrameChannel () {
@@ -87,7 +88,7 @@
 
 
 - (BOOL)isConnected {
-  return connState_ == kConnStateConnected;
+  return connState_ == kConnStateConnecting || connState_ == kConnStateConnected;
 }
 
 
@@ -96,21 +97,36 @@
 }
 
 
+- (void)setConnState:(char)connState {
+  connState_ = connState;
+}
+
+
 - (void)setDispatchChannel:(dispatch_io_t)channel {
+  assert(connState_ == kConnStateConnecting || connState_ == kConnStateConnected || connState_ == kConnStateNone);
   dispatch_io_t prevChannel = dispatchObj_.channel;
-  dispatchObj_.channel = channel;
-  if (dispatchObj_.channel) dispatch_retain(dispatchObj_.channel);
-  if (prevChannel) dispatch_release(prevChannel);
-  if (!dispatchObj_.channel && !dispatchObj_.source) connState_ = kConnStateNone;
+  if (prevChannel != channel) {
+    dispatchObj_.channel = channel;
+    if (dispatchObj_.channel) dispatch_retain(dispatchObj_.channel);
+    if (prevChannel) dispatch_release(prevChannel);
+    if (!dispatchObj_.channel && !dispatchObj_.source) {
+      connState_ = kConnStateNone;
+    }
+  }
 }
 
 
 - (void)setDispatchSource:(dispatch_source_t)source {
+  assert(connState_ == kConnStateListening || connState_ == kConnStateNone);
   dispatch_source_t prevSource = dispatchObj_.source;
-  dispatchObj_.source = source;
-  if (dispatchObj_.source) dispatch_retain(dispatchObj_.source);
-  if (prevSource) dispatch_release(prevSource);
-  if (!dispatchObj_.channel && !dispatchObj_.source) connState_ = kConnStateNone;
+  if (prevSource != source) {
+    dispatchObj_.source = source;
+    if (dispatchObj_.source) dispatch_retain(dispatchObj_.source);
+    if (prevSource) dispatch_release(prevSource);
+    if (!dispatchObj_.channel && !dispatchObj_.source) {
+      connState_ = kConnStateNone;
+    }
+  }
 }
 
 
@@ -168,9 +184,17 @@
 
 - (void)connectToPort:(int)port overUSBHub:(RUSBHub*)usbHub deviceID:(NSNumber*)deviceID callback:(void(^)(NSError *error))callback {
   assert(protocol_ != NULL);
-  [usbHub connectToDevice:deviceID port:port onStart:^(NSError *error, dispatch_io_t dispatchChannel) {
+  if (connState_ != kConnStateNone) {
+    if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
+    return;
+  }
+  connState_ = kConnStateConnecting;
+  [usbHub connectToDevice:deviceID port:port onStart:^(NSError *err, dispatch_io_t dispatchChannel) {
+    NSError *error = err;
     if (!error) {
-      [self startReadingFromChannel:dispatchChannel];
+      [self startReadingFromConnectedChannel:dispatchChannel error:&error];
+    } else {
+      connState_ = kConnStateNone;
     }
     if (callback) callback(error);
   } onEnd:^(NSError *error) {
@@ -180,12 +204,13 @@
 
 
 - (void)connectToPort:(in_port_t)port IPv4Address:(in_addr_t)address callback:(void(^)(NSError *error))callback {
+  assert(protocol_ != NULL);
   if (connState_ != kConnStateNone) {
     if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
     return;
   }
+  connState_ = kConnStateConnecting;
   
-  assert(protocol_ != NULL);
   int error = 0;
   
   // Create socket
@@ -232,8 +257,9 @@
   }
   
   // Success
-  [self startReadingFromChannel:dispatchChannel];
-  if (callback) callback(nil);
+  NSError *err = nil;
+  [self startReadingFromConnectedChannel:dispatchChannel error:&err];
+  if (callback) callback(err);
 }
 
 
@@ -311,6 +337,7 @@
   //NSLog(@"%@ opened on fd #%d", self, fd);
   
   connState_ = kConnStateListening;
+  if (callback) callback(nil);
 }
 
 
@@ -342,12 +369,19 @@
       close(clientSocketFD);
       if (channel.onEnd) channel.onEnd(channel, error == 0 ? nil : [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil]);
     });
+    
+    [channel setConnState:kConnStateConnected];
+    [channel setDispatchChannel:dispatchChannel];
+    
     self.onAccept(self, channel);
-    [channel startReadingFromChannel:dispatchChannel];
+    
+    NSError *err = nil;
+    if (![channel startReadingFromConnectedChannel:dispatchChannel error:&err]) {
+      NSLog(@"startReadingFromConnectedChannel failed in accept: %@", err);
+    }
   } else {
     close(clientSocketFD);
   }
-  
   return YES;
 }
 
@@ -356,17 +390,21 @@
 
 
 - (void)close {
-  if (dispatchObj_.channel) {
+  if (connState_ == kConnStateConnecting && dispatchObj_.channel) {
     dispatch_io_close(dispatchObj_.channel, DISPATCH_IO_STOP);
     [self setDispatchChannel:NULL];
+  } else if (connState_ == kConnStateListening && dispatchObj_.source) {
+    dispatch_source_cancel(dispatchObj_.source);
   }
 }
 
 
 - (void)cancel {
-  if (dispatchObj_.channel) {
+  if (connState_ == kConnStateConnecting && dispatchObj_.channel) {
     dispatch_io_close(dispatchObj_.channel, 0);
     [self setDispatchChannel:NULL];
+  } else if (connState_ == kConnStateListening && dispatchObj_.source) {
+    dispatch_source_cancel(dispatchObj_.source);
   }
 }
 
@@ -374,13 +412,23 @@
 #pragma mark - Reading
 
 
-- (void)startReadingFromChannel:(dispatch_io_t)channel {
-  [self close];
+- (BOOL)startReadingFromConnectedChannel:(dispatch_io_t)channel error:(__autoreleasing NSError**)error {
+  if (connState_ != kConnStateNone && connState_ != kConnStateConnecting && connState_ != kConnStateConnected) {
+    if (error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil];
+    return NO;
+  }
+  
+  if (dispatchObj_.channel != channel) {
+    [self close];
+    [self setDispatchChannel:channel];
+  }
+  
+  connState_ = kConnStateConnected;
   
   // helper
   BOOL(^handleError)(NSError*,BOOL) = ^BOOL(NSError *error, BOOL isEOS) {
     if (error) {
-      NSLog(@"Error while communicating: %@", error);
+      //NSLog(@"Error while communicating: %@", error);
       [self close];
       return YES;
     } else if (isEOS) {
@@ -389,8 +437,6 @@
     }
     return NO;
   };
-  
-  [self setDispatchChannel:channel];
   
   [protocol_ readFramesOverChannel:channel onFrame:^(NSError *error, uint32_t type, uint32_t tag, uint32_t payloadSize, dispatch_block_t resumeReadingFrames) {
     if (handleError(error, type == RIOFrameTypeEndOfStream)) {
@@ -430,13 +476,28 @@
       }
     }
   }];
+  
+  return YES;
 }
 
 
 #pragma mark - Sending
 
 - (void)sendFrameOfType:(uint32_t)frameType tag:(uint32_t)tag withPayload:(dispatch_data_t)payload callback:(void(^)(NSError *error))callback {
-  [protocol_ sendFrameOfType:frameType tag:tag withPayload:payload overChannel:dispatchObj_.channel callback:callback];
+  if (connState_ == kConnStateConnecting || connState_ == kConnStateConnected) {
+    [protocol_ sendFrameOfType:frameType tag:tag withPayload:payload overChannel:dispatchObj_.channel callback:callback];
+  } else if (callback) {
+    callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
+  }
+}
+
+#pragma mark - NSObject
+
+- (NSString*)description {
+  return [NSString stringWithFormat:@"<RIOFrameChannel: %p (%@) %@>", self, (  connState_ == kConnStateConnecting ? @"connecting"
+                                                                             : connState_ == kConnStateConnected  ? @"connected" 
+                                                                             : connState_ == kConnStateListening  ? @"listening"
+                                                                             :                                      @"closed"), protocol_];
 }
 
 

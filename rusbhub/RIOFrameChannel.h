@@ -40,13 +40,7 @@
 // Initialize a new frame channel with a specific protocol.
 - (id)initWithProtocol:(RIOFrameProtocol*)protocol;
 
-- (void)startReadingFromChannel:(dispatch_io_t)channel;
-
-- (void)close;
-
-// "graceful" close -- any queued reads and writes will complete before the
-// channel ends.
-- (void)cancel;
+- (BOOL)startReadingFromConnectedChannel:(dispatch_io_t)channel error:(__autoreleasing NSError**)error;
 
 // Connect to a TCP port on a device connected over USB
 - (void)connectToPort:(int)port overUSBHub:(RUSBHub*)usbHub deviceID:(NSNumber*)deviceID callback:(void(^)(NSError *error))callback;
@@ -64,6 +58,14 @@
 // If *callback* is not NULL, the block is invoked when either an error occured
 // or when the frame (and payload, if any) has been completely sent.
 - (void)sendFrameOfType:(uint32_t)frameType tag:(uint32_t)tag withPayload:(dispatch_data_t)payload callback:(void(^)(NSError *error))callback;
+
+// Close the channel, preventing further reading and writing. Any ongoing and
+// queued reads and writes will be aborted.
+- (void)close;
+
+// "graceful" close -- any ongoing and queued reads and writes will complete
+// before the channel ends.
+- (void)cancel;
 
 @end
 
