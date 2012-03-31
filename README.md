@@ -1,8 +1,8 @@
 # peertalk
 
-An iOS and OS X Cocoa library for communicating over USB and TCP.
+PeerTalk is a iOS and OS X Cocoa library for communicating over USB and TCP.
 
-Highlights:
+#### Highlights
 
 1. Provides you with USB device attach/detach events and attached device's info
 
@@ -13,6 +13,8 @@ Highlights:
    implementations.
 
 4. Tested and designed for libdispatch (aka Grand Central Dispatch).
+
+Grab the goods from [https://github.com/rsms/peertalk](https://github.com/rsms/peertalk)
 
 
 ## Getting started
@@ -27,27 +29,8 @@ Suck down the code and open *peertalk.xcodeproj* in Xcode 4.3 or later on OS X 1
 
 3. Connect your iOS device (iPhone, iPod or iPad) and kill the iPhone simulator and go back to Xcode. Select the "Peertalk iOS Example" target for your connected iOS device. Hit Cmd+R (Product → Run) to build and run the sample app on your device.
 
-It _should_ work. Video demo: [http://www.youtube.com/watch?v=kQPWy8N0mBg](http://www.youtube.com/watch?v=kQPWy8N0mBg)
+It _should_ work.
 
+Demo video: [http://www.youtube.com/watch?v=kQPWy8N0mBg](http://www.youtube.com/watch?v=kQPWy8N0mBg)
 
-## License (MIT)
-
-Copyright (c) 2012 Rasmus Andersson <http://rsms.me/>
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in
-all copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
-THE SOFTWARE.
+<iframe width="880" height="530" src="http://www.youtube.com/embed/kQPWy8N0mBg?hd=1&amp;rel=0" frameborder="0" allowfullscreen></iframe>
