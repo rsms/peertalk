@@ -123,7 +123,7 @@ static void _release_queue_local_protocol(void *objcobj) {
     CFAllocatorDeallocate(kCFAllocatorDefault, (void*)frame);
   });
   
-  if (payload) {
+  if (payload && frame->payloadSize != 0) {
     // chain frame + payload
     dispatch_data_t data = dispatch_data_create_concat(frameData, payload);
     dispatch_release(frameData);
@@ -141,7 +141,6 @@ static void _release_queue_local_protocol(void *objcobj) {
 - (void)sendFrameOfType:(uint32_t)frameType tag:(uint32_t)tag withPayload:(dispatch_data_t)payload overChannel:(dispatch_io_t)channel callback:(void(^)(NSError*))callback {
   dispatch_data_t frame = [self createDispatchDataWithFrameOfType:frameType frameTag:tag payload:payload];
   dispatch_io_write(channel, 0, frame, queue_, ^(bool done, dispatch_data_t data, int _errno) {
-    //NSLog(@"sendFrameOfType: dispatch_io_write: done=%d data=%p error=%d", done, data, _errno);
     if (done && callback) {
       callback(_errno == 0 ? nil : [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:_errno userInfo:nil]);
     }
