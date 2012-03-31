@@ -10,24 +10,26 @@
 #import "PTProtocol.h"
 #import "PTUSBHub.h"
 
-@class PTData;
+@class PTData, PTAddress;
 @protocol PTChannelDelegate;
 
 @interface PTChannel : NSObject
 
-@property PTProtocol *protocol;
+// Delegate
 @property (strong) id<PTChannelDelegate> delegate;
-@property (readonly) BOOL isListening; // YES if this channel is a listening server
-@property (readonly) BOOL isConnected; // YES if this channel is a connected peer
 
-// These block callbacks can be used as an alternative to providing a delegate.
-// You can not use a delegate AND provide block callbacks. E.g. setting a
-// delegate and then setting a onFrame callback block will re-route any "frame"
-// events to the block and never call the delegate.
-@property (copy) BOOL(^shouldAcceptFrame)(PTChannel *channel, uint32_t type, uint32_t tag, uint32_t payloadSize);
-@property (copy) void(^onFrame)(PTChannel *channel, uint32_t type, uint32_t tag, PTData *payload);
-@property (copy) void(^onAccept)(PTChannel *serverChannel, PTChannel *channel);
-@property (copy) void(^onEnd)(PTChannel *channel, NSError *error);
+// Communication protocol. Must not be nil.
+@property PTProtocol *protocol;
+
+// YES if this channel is a listening server
+@property (readonly) BOOL isListening;
+
+// YES if this channel is a connected peer
+@property (readonly) BOOL isConnected;
+
+// Arbitrary attachment. Note that if you set this, the object will grow by
+// 8 bytes (64 bits).
+@property (strong) id userInfo;
 
 // Create a new channel using the shared PTProtocol for the current dispatch
 // queue, with *delegate*.
@@ -51,7 +53,7 @@
 
 // Connect to a TCP port at IPv4 address. INADDR_LOOPBACK can be used as address
 // to connect to the local host.
-- (void)connectToPort:(in_port_t)port IPv4Address:(in_addr_t)address callback:(void(^)(NSError *error))callback;
+- (void)connectToPort:(in_port_t)port IPv4Address:(in_addr_t)address callback:(void(^)(NSError *error, PTAddress *address))callback;
 
 // Listen for connections on port and address, effectively starting a socket
 // server. For this to make sense, you should provide a onAccept block handler
@@ -77,13 +79,6 @@
 @end
 
 
-// A simple subclass used for device-specific channels that contains a device
-// identifier
-@interface PTDeviceChannel : PTChannel
-@property (strong) id deviceID;
-@end
-
-
 // Wraps a mapped dispatch_data_t object. The memory pointed to by *data* is
 // valid until *dispatchData* is deallocated (normally when the receiver is
 // deallocated).
@@ -91,6 +86,15 @@
 @property (readonly) dispatch_data_t dispatchData;
 @property (readonly) void *data;
 @property (readonly) size_t length;
+@end
+
+
+// Represents a peer's address
+@interface PTAddress : NSObject
+// For network addresses, this is the IP address in textual format
+@property (readonly) NSString *name;
+// For network addresses, this is the port number. Otherwise 0 (zero).
+@property (readonly) NSInteger port;
 @end
 
 
@@ -112,6 +116,6 @@
 
 // For listening channels, this method is invoked when a new connection has been
 // accepted.
-- (void)ioFrameChannel:(PTChannel*)channel didAcceptConnection:(PTChannel*)otherChannel;
+- (void)ioFrameChannel:(PTChannel*)channel didAcceptConnection:(PTChannel*)otherChannel fromAddress:(PTAddress*)address;
 
 @end
