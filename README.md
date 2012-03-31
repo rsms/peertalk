@@ -1,6 +1,6 @@
 # peertalk
 
-An iOS and OS X Cocoa library communicating over USB and TCP/IP.
+An iOS and OS X Cocoa library for communicating over USB and TCP.
 
 Highlights:
 
@@ -27,7 +27,7 @@ Suck down the code and open *peertalk.xcodeproj* in Xcode 4.3 or later on OS X 1
 
 3. Connect your iOS device (iPhone, iPod or iPad) and kill the iPhone simulator and go back to Xcode. Select the "Peertalk iOS Example" target for your connected iOS device. Hit Cmd+R (Product → Run) to build and run the sample app on your device.
 
-It _should_ work.
+It _should_ work. Video demo: [http://www.youtube.com/watch?v=kQPWy8N0mBg](http://www.youtube.com/watch?v=kQPWy8N0mBg)
 
 
 ## License (MIT)
