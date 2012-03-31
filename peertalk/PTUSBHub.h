@@ -1,6 +1,6 @@
 #include <dispatch/dispatch.h>
 
-// RUSBDeviceDidAttachNotification
+// PTUSBDeviceDidAttachNotification
 // Posted when a device has been attached. Also posted for each device that is
 // already attached when the PTUSBHub starts listening.
 //
@@ -17,9 +17,9 @@
 //    };
 //  }
 //
-NSString *RUSBDeviceDidAttachNotification;
+NSString *PTUSBDeviceDidAttachNotification;
 
-// RUSBDeviceDidDetachNotification
+// PTUSBDeviceDidDetachNotification
 // Posted when a device has been detached.
 //
 //  .userInfo = {
@@ -27,7 +27,7 @@ NSString *RUSBDeviceDidAttachNotification;
 //    MessageType = Detached;
 //  }
 //
-NSString *RUSBDeviceDidDetachNotification;
+NSString *PTUSBDeviceDidDetachNotification;
 
 // NSError domain
 NSString *PTUSBHubErrorDomain;

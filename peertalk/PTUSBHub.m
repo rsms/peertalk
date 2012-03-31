@@ -97,21 +97,21 @@ static void usbmux_packet_free(usbmux_packet_t *upacket) {
 }
 
 
-NSString *RUSBDeviceDidAttachNotification = @"RUSBDeviceDidAttachNotification";
-NSString *RUSBDeviceDidDetachNotification = @"RUSBDeviceDidDetachNotification";
+NSString *PTUSBDeviceDidAttachNotification = @"PTUSBDeviceDidAttachNotification";
+NSString *PTUSBDeviceDidDetachNotification = @"PTUSBDeviceDidDetachNotification";
 
 static NSString *kPlistPacketTypeListen = @"Listen";
 static NSString *kPlistPacketTypeConnect = @"Connect";
 
 
 // Represents a channel of communication between the host process and a remote
-// (device) system. In practice, a RUSBChannel is connected to a usbmuxd
+// (device) system. In practice, a PTUSBChannel is connected to a usbmuxd
 // endpoint which is configured to either listen for device changes (the
 // PTUSBHub's channel is usually configured as a device notification listener) or
 // configured as a TCP bridge (e.g. channels returned from PTUSBHub's
 // connectToDevice:port:callback:). You should not create channels yourself, but
 // let PTUSBHub provide you with already configured channels.
-@interface RUSBChannel : NSObject {
+@interface PTUSBChannel : NSObject {
   dispatch_io_t channel_;
   dispatch_queue_t queue_;
   uint32_t nextPacketTag_;
@@ -121,8 +121,8 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 }
 
 // The underlying dispatch I/O channel. This is handy if you want to handle your
-// own I/O logic without RUSBChannel. Remember to dispatch_retain() the channel
-// if you plan on using it as it might be released from the RUSBChannel at any
+// own I/O logic without PTUSBChannel. Remember to dispatch_retain() the channel
+// if you plan on using it as it might be released from the PTUSBChannel at any
 // point in time.
 @property (readonly) dispatch_io_t dispatchChannel;
 
@@ -147,7 +147,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 @end
 
 
-@interface RUSBChannel (Private)
+@interface PTUSBChannel (Private)
 
 + (NSDictionary*)packetDictionaryWithPacketType:(NSString*)messageType payload:(NSDictionary*)payload;
 - (BOOL)openOnQueue:(dispatch_queue_t)queue error:(NSError**)error onEnd:(void(^)(NSError *error))onEnd;
@@ -164,7 +164,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 
 
 @interface PTUSBHub () {
-  RUSBChannel *channel_;
+  PTUSBChannel *channel_;
 }
 - (void)handleBroadcastPacket:(NSDictionary*)packet;
 @end
@@ -200,7 +200,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
     if (onStart) onStart(nil);
     return;
   }
-  channel_ = [RUSBChannel new];
+  channel_ = [PTUSBChannel new];
   NSError *error = nil;
   if ([channel_ openOnQueue:queue error:&error onEnd:onEnd]) {
     [channel_ listenWithBroadcastHandler:^(NSDictionary *packet) { [self handleBroadcastPacket:packet]; } callback:onStart];
@@ -211,7 +211,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 
 
 - (void)connectToDevice:(NSNumber*)deviceID port:(int)port onStart:(void(^)(NSError*, dispatch_io_t))onStart onEnd:(void(^)(NSError*))onEnd {
-  RUSBChannel *channel = [RUSBChannel new];
+  PTUSBChannel *channel = [PTUSBChannel new];
   NSError *error = nil;
   
   if (![channel openOnQueue:dispatch_get_current_queue() error:&error onEnd:onEnd]) {
@@ -221,7 +221,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
   
   port = ((port<<8) & 0xFF00) | (port>>8); // limit
   
-  NSDictionary *packet = [RUSBChannel packetDictionaryWithPacketType:kPlistPacketTypeConnect
+  NSDictionary *packet = [PTUSBChannel packetDictionaryWithPacketType:kPlistPacketTypeConnect
                                                              payload:[NSDictionary dictionaryWithObjectsAndKeys:
                                                                       deviceID, @"DeviceID",
                                                                       [NSNumber numberWithInt:port], @"PortNumber",
@@ -239,9 +239,9 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
   NSString *messageType = [packet objectForKey:@"MessageType"];
   
   if ([@"Attached" isEqualToString:messageType]) {
-    [[NSNotificationCenter defaultCenter] postNotificationName:RUSBDeviceDidAttachNotification object:self userInfo:packet];
+    [[NSNotificationCenter defaultCenter] postNotificationName:PTUSBDeviceDidAttachNotification object:self userInfo:packet];
   } else if ([@"Detached" isEqualToString:messageType]) {
-    [[NSNotificationCenter defaultCenter] postNotificationName:RUSBDeviceDidDetachNotification object:self userInfo:packet];
+    [[NSNotificationCenter defaultCenter] postNotificationName:PTUSBDeviceDidDetachNotification object:self userInfo:packet];
   } else {
     NSLog(@"Warning: Unhandled broadcast message: %@", packet);
   }
@@ -252,7 +252,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 
 #pragma mark -
 
-@implementation RUSBChannel
+@implementation PTUSBChannel
 
 + (NSDictionary*)packetDictionaryWithPacketType:(NSString*)messageType payload:(NSDictionary*)payload {
   NSDictionary *packet = nil;
@@ -359,7 +359,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
   autoReadPackets_ = YES;
   [self scheduleReadPacketWithBroadcastHandler:broadcastHandler];
   
-  NSDictionary *packet = [RUSBChannel packetDictionaryWithPacketType:kPlistPacketTypeListen payload:nil];
+  NSDictionary *packet = [PTUSBChannel packetDictionaryWithPacketType:kPlistPacketTypeListen payload:nil];
   
   [self sendRequest:packet callback:^(NSError *error_, NSDictionary *responsePacket) {
     if (!callback)
