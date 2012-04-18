@@ -122,7 +122,7 @@
   if (channel != peerChannel_) {
     // A previous channel that has been canceled but not yet ended. Ignore.
     return NO;
-  } else if (type != PTExampleFrameTypeTextMessage) {
+  } else if (type != PTExampleFrameTypeTextMessage && type != PTExampleFrameTypePing) {
     NSLog(@"Unexpected frame of type %u", type);
     [channel close];
     return NO;
@@ -137,6 +137,8 @@
   if (type == PTExampleFrameTypeTextMessage) {
     NSString *message = [[NSString alloc] initWithBytes:payload.data length:payload.length encoding:NSUTF8StringEncoding];
     [self appendOutputMessage:[NSString stringWithFormat:@"[%@]: %@", channel.userInfo, message]];
+  } else if (type == PTExampleFrameTypePing && peerChannel_) {
+    [peerChannel_ sendFrameOfType:PTExampleFrameTypePong tag:tag withPayload:nil callback:nil];
   }
 }
 

@@ -14,6 +14,7 @@
   PTChannel *connectedChannel_;
   NSDictionary *consoleTextAttributes_;
   NSDictionary *consoleStatusTextAttributes_;
+  NSMutableDictionary *pings_;
 }
 
 @property (readonly) NSNumber *connectedDeviceID;
@@ -26,6 +27,7 @@
 - (void)enqueueConnectToLocalIPv4Port;
 - (void)connectToLocalIPv4Port;
 - (void)connectToUSBDevice;
+- (void)ping;
 
 @end
 
@@ -68,6 +70,9 @@
   
   // Put a little message in the UI
   [self presentMessage:@"Ready for action — connecting at will." isStatus:YES];
+  
+  // Start pinging
+  [self ping];
 }
 
 
@@ -134,12 +139,51 @@
 }
 
 
+#pragma mark - Ping
+
+
+- (void)pongWithTag:(uint32_t)tagno error:(NSError*)error {
+  NSNumber *tag = [NSNumber numberWithUnsignedInt:tagno];
+  NSMutableDictionary *pingInfo = [pings_ objectForKey:tag];
+  if (pingInfo) {
+    NSDate *now = [NSDate date];
+    [pingInfo setObject:now forKey:@"date ended"];
+    [pings_ removeObjectForKey:tag];
+    NSLog(@"Ping total roundtrip time: %.3f ms", [now timeIntervalSinceDate:[pingInfo objectForKey:@"date created"]]*1000.0);
+  }
+}
+
+
+- (void)ping {
+  if (connectedChannel_) {
+    if (!pings_) {
+      pings_ = [NSMutableDictionary dictionary];
+    }
+    uint32_t tagno = [connectedChannel_.protocol newTag];
+    NSNumber *tag = [NSNumber numberWithUnsignedInt:tagno];
+    NSMutableDictionary *pingInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSDate date], @"date created", nil];
+    [pings_ setObject:pingInfo forKey:tag];
+    [connectedChannel_ sendFrameOfType:PTExampleFrameTypePing tag:tagno withPayload:nil callback:^(NSError *error) {
+      [self performSelector:@selector(ping) withObject:nil afterDelay:1.0];
+      [pingInfo setObject:[NSDate date] forKey:@"date sent"];
+      if (error) {
+        [pings_ removeObjectForKey:tag];
+      }
+    }];
+  } else {
+    [self performSelector:@selector(ping) withObject:nil afterDelay:1.0];
+  }
+}
+
+
 #pragma mark - PTChannelDelegate
 
 
 - (BOOL)ioFrameChannel:(PTChannel*)channel shouldAcceptFrameOfType:(uint32_t)type tag:(uint32_t)tag payloadSize:(uint32_t)payloadSize {
   if (   type != PTExampleFrameTypeDeviceInfo
       && type != PTExampleFrameTypeTextMessage
+      && type != PTExampleFrameTypePing
+      && type != PTExampleFrameTypePong
       && type != PTFrameTypeEndOfStream) {
     NSLog(@"Unexpected frame of type %u", type);
     [channel close];
@@ -157,6 +201,8 @@
   } else if (type == PTExampleFrameTypeTextMessage) {
     NSString *message = [[NSString alloc] initWithBytes:payload.data length:payload.length encoding:NSUTF8StringEncoding];
     [self presentMessage:[NSString stringWithFormat:@"[%@]: %@", channel.userInfo, message] isStatus:NO];
+  } else if (type == PTExampleFrameTypePong) {
+    [self pongWithTag:tag error:nil];
   }
 }
 
