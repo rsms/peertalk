@@ -103,6 +103,7 @@ NSString *PTProtocolErrorDomain;
 // holds a reference to the recevier. It's the callers responsibility to call
 // dispatch_release on the returned object when done.
 - (dispatch_data_t)createReferencingDispatchData;
++ (NSData *)dataWithContentsOfDispatchData:(dispatch_data_t)data;
 @end
 
 @interface NSDictionary (PTProtocol)

@@ -1,4 +1,5 @@
 #import "PTProtocol.h"
+#import <objc/runtime.h>
 
 static const uint32_t PTProtocolVersion1 = 1;
 
@@ -256,6 +257,7 @@ static void _release_queue_local_protocol(void *objcobj) {
           return;
         }
       }
+      
       callback(nil, contiguousData, buffer, bufferSize);
       if (contiguousData) dispatch_release(contiguousData);
     }
@@ -287,6 +289,22 @@ static void _release_queue_local_protocol(void *objcobj) {
 @end
 
 
+@interface _PTDispatchData : NSObject {
+  dispatch_data_t dispatchData_;
+}
+@end
+@implementation _PTDispatchData
+- (id)initWithDispatchData:(dispatch_data_t)dispatchData {
+  if (!(self = [super init])) return nil;
+  dispatchData_ = dispatchData;
+  dispatch_retain(dispatchData_);
+  return self;
+}
+- (void)dealloc {
+  if (dispatchData_) dispatch_release(dispatchData_);
+}
+@end
+
 @implementation NSData (PTProtocol)
 
 - (dispatch_data_t)createReferencingDispatchData {
@@ -297,6 +315,26 @@ static void _release_queue_local_protocol(void *objcobj) {
     // trick to have the block capture the data, thus retain/releasing
     [self length];
   });
+}
+
++ (NSData *)dataWithContentsOfDispatchData:(dispatch_data_t)data {
+  if (!data) {
+    return nil;
+  }
+  uint8_t *buffer = NULL;
+  size_t bufferSize = 0;
+  dispatch_data_t contiguousData = dispatch_data_create_map(data, (const void **)&buffer, &bufferSize);
+  if (!contiguousData) {
+    return nil;
+  }
+  
+  _PTDispatchData *dispatchDataRef = [[_PTDispatchData alloc] initWithDispatchData:contiguousData];
+  NSData *newData = [NSData dataWithBytesNoCopy:(void*)buffer length:bufferSize freeWhenDone:NO];
+  dispatch_release(contiguousData);
+  static const bool kDispatchDataRefKey;
+  objc_setAssociatedObject(newData, (const void*)kDispatchDataRefKey, dispatchDataRef, OBJC_ASSOCIATION_RETAIN);
+  
+  return newData;
 }
 
 @end
