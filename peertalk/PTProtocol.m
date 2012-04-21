@@ -233,11 +233,13 @@ static void _release_queue_local_protocol(void *objcobj) {
     
     if (done) {
       if (error != 0) {
+        if (allData) dispatch_release(allData);
         callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil], NULL, NULL, 0);
         return;
       }
       
       if (dataSize == 0) {
+        if (allData) dispatch_release(allData);
         callback(nil, NULL, NULL, 0);
         return;
       }
