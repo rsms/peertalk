@@ -35,6 +35,7 @@
     dispatch_io_t channel;
     dispatch_source_t source;
   } dispatchObj_;                  // 64 bit
+  NSError *endError_;              // 64 bit
 @public  // here be hacks
   id<PTChannelDelegate> delegate_; // 64 bit
   uint8_t delegateFlags_;             // 8 bit
@@ -203,6 +204,7 @@ static const uint8_t kUserInfoKey;
     if (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
       [delegate_ ioFrameChannel:self didEndWithError:error];
     }
+    endError_ = nil;
   }];
 }
 
@@ -261,8 +263,9 @@ static const uint8_t kUserInfoKey;
   dispatch_io_t dispatchChannel = dispatch_io_create(DISPATCH_IO_STREAM, fd, protocol_.queue, ^(int error) {
     close(fd);
     if (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
-      NSError *err = error == 0 ? nil : [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil];
+      NSError *err = error == 0 ? endError_ : [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil];
       [delegate_ ioFrameChannel:self didEndWithError:err];
+      endError_ = nil;
     }
   });
   
@@ -348,7 +351,8 @@ static const uint8_t kUserInfoKey;
     dispatchObj_.source = nil;
     close(fd);
     if (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
-      [delegate_ ioFrameChannel:self didEndWithError:nil];
+      [delegate_ ioFrameChannel:self didEndWithError:endError_];
+      endError_ = nil;
     }
   });
   
@@ -388,8 +392,9 @@ static const uint8_t kUserInfoKey;
       close(clientSocketFD);
       
       if (channel->delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
-        NSError *err = error == 0 ? nil : [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil];
+        NSError *err = error == 0 ? endError_ : [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil];
         [channel->delegate_ ioFrameChannel:channel didEndWithError:err];
+        endError_ = nil;
       }
     });
     
@@ -454,6 +459,7 @@ static const uint8_t kUserInfoKey;
   BOOL(^handleError)(NSError*,BOOL) = ^BOOL(NSError *error, BOOL isEOS) {
     if (error) {
       //NSLog(@"Error while communicating: %@", error);
+      endError_ = error;
       [self close];
       return YES;
     } else if (isEOS) {
