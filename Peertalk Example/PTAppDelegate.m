@@ -79,7 +79,7 @@
 - (IBAction)sendMessage:(id)sender {
   if (connectedChannel_) {
     NSString *message = self.inputTextField.stringValue;
-    dispatch_data_t payload = [[message dataUsingEncoding:NSUTF8StringEncoding] createReferencingDispatchData];
+    dispatch_data_t payload = PTExampleTextDispatchDataWithString(message);
     [connectedChannel_ sendFrameOfType:PTExampleFrameTypeTextMessage tag:PTFrameNoTag withPayload:payload callback:^(NSError *error) {
       if (error) {
         NSLog(@"Failed to send message: %@", error);
@@ -199,7 +199,9 @@
     NSDictionary *deviceInfo = [NSDictionary dictionaryWithContentsOfDispatchData:payload.dispatchData];
     [self presentMessage:[NSString stringWithFormat:@"Connected to %@", deviceInfo.description] isStatus:YES];
   } else if (type == PTExampleFrameTypeTextMessage) {
-    NSString *message = [[NSString alloc] initWithBytes:payload.data length:payload.length encoding:NSUTF8StringEncoding];
+    PTExampleTextFrame *textFrame = (PTExampleTextFrame*)payload.data;
+    textFrame->length = ntohl(textFrame->length);
+    NSString *message = [[NSString alloc] initWithBytes:textFrame->utf8text length:textFrame->length encoding:NSUTF8StringEncoding];
     [self presentMessage:[NSString stringWithFormat:@"[%@]: %@", channel.userInfo, message] isStatus:NO];
   } else if (type == PTExampleFrameTypePong) {
     [self pongWithTag:tag error:nil];

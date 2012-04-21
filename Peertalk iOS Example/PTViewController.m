@@ -58,7 +58,7 @@
 
 - (void)sendMessage:(NSString*)message {
   if (peerChannel_) {
-    dispatch_data_t payload = [[message dataUsingEncoding:NSUTF8StringEncoding] createReferencingDispatchData];
+    dispatch_data_t payload = PTExampleTextDispatchDataWithString(message);
     [peerChannel_ sendFrameOfType:PTExampleFrameTypeTextMessage tag:PTFrameNoTag withPayload:payload callback:^(NSError *error) {
       if (error) {
         NSLog(@"Failed to send message: %@", error);
@@ -135,7 +135,9 @@
 - (void)ioFrameChannel:(PTChannel*)channel didReceiveFrameOfType:(uint32_t)type tag:(uint32_t)tag payload:(PTData*)payload {
   //NSLog(@"didReceiveFrameOfType: %u, %u, %@", type, tag, payload);
   if (type == PTExampleFrameTypeTextMessage) {
-    NSString *message = [[NSString alloc] initWithBytes:payload.data length:payload.length encoding:NSUTF8StringEncoding];
+    PTExampleTextFrame *textFrame = (PTExampleTextFrame*)payload.data;
+    textFrame->length = ntohl(textFrame->length);
+    NSString *message = [[NSString alloc] initWithBytes:textFrame->utf8text length:textFrame->length encoding:NSUTF8StringEncoding];
     [self appendOutputMessage:[NSString stringWithFormat:@"[%@]: %@", channel.userInfo, message]];
   } else if (type == PTExampleFrameTypePing && peerChannel_) {
     [peerChannel_ sendFrameOfType:PTExampleFrameTypePong tag:tag withPayload:nil callback:nil];
