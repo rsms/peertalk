@@ -9,11 +9,11 @@
 
 // Read member of sockaddr_in without knowing the family
 #define PT_SOCKADDR_ACCESS(ss, member4, member6) \
-  (((ss)->ss_family == AF_INET) ? ( \
-    ((const struct sockaddr_in *)(ss))->member4 \
-  ) : ( \
-    ((const struct sockaddr_in6 *)(ss))->member6 \
-  ))
+(((ss)->ss_family == AF_INET) ? ( \
+((const struct sockaddr_in *)(ss))->member4 \
+) : ( \
+((const struct sockaddr_in6 *)(ss))->member6 \
+))
 
 // Connection state (storage: uint8_t)
 #define kConnStateNone 0
@@ -31,17 +31,17 @@
 // Note: We are careful about the size of this struct as each connected peer
 // implies one allocation of this struct.
 @interface PTChannel () {
-  union dispatchObj {
-    dispatch_io_t channel;
-    dispatch_source_t source;
-  } dispatchObj_;                  // 64 bit
-  NSError *endError_;              // 64 bit
+    union dispatchObj {
+        dispatch_io_t channel;
+        dispatch_source_t source;
+    } dispatchObj_;                  // 64 bit
+    NSError *endError_;              // 64 bit
 @public  // here be hacks
-  id<PTChannelDelegate> delegate_; // 64 bit
-  uint8_t delegateFlags_;             // 8 bit
+    id<PTChannelDelegate> delegate_; // 64 bit
+    uint8_t delegateFlags_;             // 8 bit
 @private
-  uint8_t connState_;                 // 8 bit
-  //char padding_[6];              // 48 bit -- only if allocation speed is important
+    uint8_t connState_;                 // 8 bit
+    //char padding_[6];              // 48 bit -- only if allocation speed is important
 }
 - (id)initWithProtocol:(PTProtocol*)protocol delegate:(id<PTChannelDelegate>)delegate;
 - (BOOL)acceptIncomingConnection:(dispatch_fd_t)serverSocketFD;
@@ -55,7 +55,7 @@ static const uint8_t kUserInfoKey;
 
 #pragma mark -
 @interface PTAddress () {
-  struct sockaddr_storage sockaddr_;
+    struct sockaddr_storage sockaddr_;
 }
 - (id)initWithSockaddr:(const struct sockaddr_storage*)addr;
 @end
@@ -67,111 +67,115 @@ static const uint8_t kUserInfoKey;
 
 
 + (PTChannel*)channelWithDelegate:(id<PTChannelDelegate>)delegate {
-  return [[PTChannel alloc] initWithProtocol:[PTProtocol sharedProtocolForQueue:dispatch_get_current_queue()] delegate:delegate];
+    return [[PTChannel alloc] initWithProtocol:[PTProtocol sharedProtocolForQueue:dispatch_get_current_queue()] delegate:delegate];
 }
 
 
 - (id)initWithProtocol:(PTProtocol*)protocol delegate:(id<PTChannelDelegate>)delegate {
-  if (!(self = [super init])) return nil;
-  protocol_ = protocol;
-  self.delegate = delegate;
-  return self;
+    if (!(self = [super init])) return nil;
+    protocol_ = protocol;
+    self.delegate = delegate;
+    return self;
 }
 
 
 - (id)initWithProtocol:(PTProtocol*)protocol {
-  if (!(self = [super init])) return nil;
-  protocol_ = protocol;
-  return self;
+    if (!(self = [super init])) return nil;
+    protocol_ = protocol;
+    return self;
 }
 
 
 - (id)init {
-  return [self initWithProtocol:[PTProtocol sharedProtocolForQueue:dispatch_get_current_queue()]];
+    return [self initWithProtocol:[PTProtocol sharedProtocolForQueue:dispatch_get_current_queue()]];
 }
 
 
 - (void)dealloc {
-  if (dispatchObj_.channel) dispatch_release(dispatchObj_.channel);
-  else if (dispatchObj_.source) dispatch_release(dispatchObj_.source);
+    if (dispatchObj_.channel) dispatch_release(dispatchObj_.channel);
+    else if (dispatchObj_.source) dispatch_release(dispatchObj_.source);
+    
+    #if !__has_feature(objc_arc)
+        [super dealloc];
+    #endif
 }
 
 
 - (BOOL)isConnected {
-  return connState_ == kConnStateConnecting || connState_ == kConnStateConnected;
+    return connState_ == kConnStateConnecting || connState_ == kConnStateConnected;
 }
 
 
 - (BOOL)isListening {
-  return connState_ == kConnStateListening;
+    return connState_ == kConnStateListening;
 }
 
 
 - (id)userInfo {
-  return objc_getAssociatedObject(self, (void*)&kUserInfoKey);
+    return objc_getAssociatedObject(self, (void*)&kUserInfoKey);
 }
 
 - (void)setUserInfo:(id)userInfo {
-  objc_setAssociatedObject(self, (const void*)&kUserInfoKey, userInfo, OBJC_ASSOCIATION_RETAIN);
+    objc_setAssociatedObject(self, (const void*)&kUserInfoKey, userInfo, OBJC_ASSOCIATION_RETAIN);
 }
 
 
 - (void)setConnState:(char)connState {
-  connState_ = connState;
+    connState_ = connState;
 }
 
 
 - (void)setDispatchChannel:(dispatch_io_t)channel {
-  assert(connState_ == kConnStateConnecting || connState_ == kConnStateConnected || connState_ == kConnStateNone);
-  dispatch_io_t prevChannel = dispatchObj_.channel;
-  if (prevChannel != channel) {
-    dispatchObj_.channel = channel;
-    if (dispatchObj_.channel) dispatch_retain(dispatchObj_.channel);
-    if (prevChannel) dispatch_release(prevChannel);
-    if (!dispatchObj_.channel && !dispatchObj_.source) {
-      connState_ = kConnStateNone;
+    assert(connState_ == kConnStateConnecting || connState_ == kConnStateConnected || connState_ == kConnStateNone);
+    dispatch_io_t prevChannel = dispatchObj_.channel;
+    if (prevChannel != channel) {
+        dispatchObj_.channel = channel;
+        if (dispatchObj_.channel) dispatch_retain(dispatchObj_.channel);
+        if (prevChannel) dispatch_release(prevChannel);
+        if (!dispatchObj_.channel && !dispatchObj_.source) {
+            connState_ = kConnStateNone;
+        }
     }
-  }
 }
 
 
 - (void)setDispatchSource:(dispatch_source_t)source {
-  assert(connState_ == kConnStateListening || connState_ == kConnStateNone);
-  dispatch_source_t prevSource = dispatchObj_.source;
-  if (prevSource != source) {
-    dispatchObj_.source = source;
-    if (dispatchObj_.source) dispatch_retain(dispatchObj_.source);
-    if (prevSource) dispatch_release(prevSource);
-    if (!dispatchObj_.channel && !dispatchObj_.source) {
-      connState_ = kConnStateNone;
+    assert(connState_ == kConnStateListening || connState_ == kConnStateNone);
+    dispatch_source_t prevSource = dispatchObj_.source;
+    if (prevSource != source) {
+        dispatchObj_.source = source;
+        if (dispatchObj_.source) dispatch_retain(dispatchObj_.source);
+        if (prevSource) dispatch_release(prevSource);
+        if (!dispatchObj_.channel && !dispatchObj_.source) {
+            connState_ = kConnStateNone;
+        }
     }
-  }
 }
 
 
 - (id<PTChannelDelegate>)delegate {
-  return delegate_;
+    return delegate_;
 }
 
 
 - (void)setDelegate:(id<PTChannelDelegate>)delegate {
-  delegate_ = delegate;
-  delegateFlags_ = 0;
-  if (!delegate_) {
-    return;
-  }
-  
-  if ([delegate respondsToSelector:@selector(ioFrameChannel:shouldAcceptFrameOfType:tag:payloadSize:)]) {
-    delegateFlags_ |= kDelegateFlagImplements_ioFrameChannel_shouldAcceptFrameOfType_tag_payloadSize;
-  }
-  
-  if (delegate_ && [delegate respondsToSelector:@selector(ioFrameChannel:didEndWithError:)]) {
-    delegateFlags_ |= kDelegateFlagImplements_ioFrameChannel_didEndWithError;
-  }
-  
-  if (delegate_ && [delegate respondsToSelector:@selector(ioFrameChannel:didAcceptConnection:fromAddress:)]) {
-    delegateFlags_ |= kDelegateFlagImplements_ioFrameChannel_didAcceptConnection_fromAddress;
-  }
+    delegate_ = delegate;
+    delegateFlags_ = 0;
+    if (!delegate_) {
+        return;
+    }
+    
+    if ([delegate respondsToSelector:@selector(ioFrameChannel:shouldAcceptFrameOfType:tag:payloadSize:)]) {
+        delegateFlags_ |= kDelegateFlagImplements_ioFrameChannel_shouldAcceptFrameOfType_tag_payloadSize;
+    }
+    
+    if (delegate_ && [delegate respondsToSelector:@selector(ioFrameChannel:didEndWithError:)]) {
+        delegateFlags_ |= kDelegateFlagImplements_ioFrameChannel_didEndWithError;
+    }
+    
+    if (delegate_ && [delegate respondsToSelector:@selector(ioFrameChannel:didAcceptConnection:fromAddress:)]) {
+        delegateFlags_ |= kDelegateFlagImplements_ioFrameChannel_didAcceptConnection_fromAddress;
+    }
 }
 
 
@@ -186,100 +190,100 @@ static const uint8_t kUserInfoKey;
 
 
 - (void)connectToPort:(int)port overUSBHub:(PTUSBHub*)usbHub deviceID:(NSNumber*)deviceID callback:(void(^)(NSError *error))callback {
-  assert(protocol_ != NULL);
-  if (connState_ != kConnStateNone) {
-    if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
-    return;
-  }
-  connState_ = kConnStateConnecting;
-  [usbHub connectToDevice:deviceID port:port onStart:^(NSError *err, dispatch_io_t dispatchChannel) {
-    NSError *error = err;
-    if (!error) {
-      [self startReadingFromConnectedChannel:dispatchChannel error:&error];
-    } else {
-      connState_ = kConnStateNone;
+    assert(protocol_ != NULL);
+    if (connState_ != kConnStateNone) {
+        if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
+        return;
     }
-    if (callback) callback(error);
-  } onEnd:^(NSError *error) {
-    if (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
-      [delegate_ ioFrameChannel:self didEndWithError:error];
-    }
-    endError_ = nil;
-  }];
+    connState_ = kConnStateConnecting;
+    [usbHub connectToDevice:deviceID port:port onStart:^(NSError *err, dispatch_io_t dispatchChannel) {
+        NSError *error = err;
+        if (!error) {
+            [self startReadingFromConnectedChannel:dispatchChannel error:&error];
+        } else {
+            connState_ = kConnStateNone;
+        }
+        if (callback) callback(error);
+    } onEnd:^(NSError *error) {
+        if (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
+            [delegate_ ioFrameChannel:self didEndWithError:error];
+        }
+        endError_ = nil;
+    }];
 }
 
 
 - (void)connectToPort:(in_port_t)port IPv4Address:(in_addr_t)ipv4Address callback:(void(^)(NSError *error, PTAddress *address))callback {
-  assert(protocol_ != NULL);
-  if (connState_ != kConnStateNone) {
-    if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil], nil);
-    return;
-  }
-  connState_ = kConnStateConnecting;
-  
-  int error = 0;
-  
-  // Create socket
-  dispatch_fd_t fd = socket(AF_INET, SOCK_STREAM, 0);
-  if (fd == -1) {
-    perror("socket(AF_INET, SOCK_STREAM, 0) failed");
-    error = errno;
-    if (callback) callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil], nil);
-    return;
-  }
-  
-  // Connect socket
-  struct sockaddr_in addr;
-  bzero((char *)&addr, sizeof(addr));
-  
-  addr.sin_len = sizeof(addr);
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons(port);
-  //addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-  //addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  addr.sin_addr.s_addr = htonl(ipv4Address);
-  
-  // prevent SIGPIPE
+    assert(protocol_ != NULL);
+    if (connState_ != kConnStateNone) {
+        if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil], nil);
+        return;
+    }
+    connState_ = kConnStateConnecting;
+    
+    int error = 0;
+    
+    // Create socket
+    dispatch_fd_t fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd == -1) {
+        perror("socket(AF_INET, SOCK_STREAM, 0) failed");
+        error = errno;
+        if (callback) callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil], nil);
+        return;
+    }
+    
+    // Connect socket
+    struct sockaddr_in addr;
+    bzero((char *)&addr, sizeof(addr));
+    
+    addr.sin_len = sizeof(addr);
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    //addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    //addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.sin_addr.s_addr = htonl(ipv4Address);
+    
+    // prevent SIGPIPE
 	int on = 1;
 	setsockopt(fd, SOL_SOCKET, SO_NOSIGPIPE, &on, sizeof(on));
-  
-  // int socket, const struct sockaddr *address, socklen_t address_len
-  if (connect(fd, (const struct sockaddr *)&addr, addr.sin_len) == -1) {
-    //perror("connect");
-    error = errno;
-    close(fd);
-    if (callback) callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil], nil);
-    return;
-  }
-  
-  // get actual address
-  //if (getsockname(fd, (struct sockaddr*)&addr, (socklen_t*)&addr.sin_len) == -1) {
-  //  error = errno;
-  //  close(fd);
-  //  if (callback) callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil], nil);
-  //  return;
-  //}
-  
-  dispatch_io_t dispatchChannel = dispatch_io_create(DISPATCH_IO_STREAM, fd, protocol_.queue, ^(int error) {
-    close(fd);
-    if (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
-      NSError *err = error == 0 ? endError_ : [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil];
-      [delegate_ ioFrameChannel:self didEndWithError:err];
-      endError_ = nil;
+    
+    // int socket, const struct sockaddr *address, socklen_t address_len
+    if (connect(fd, (const struct sockaddr *)&addr, addr.sin_len) == -1) {
+        //perror("connect");
+        error = errno;
+        close(fd);
+        if (callback) callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil], nil);
+        return;
     }
-  });
-  
-  if (!dispatchChannel) {
-    close(fd);
-    if (callback) callback([[NSError alloc] initWithDomain:@"PTError" code:0 userInfo:nil], nil);
-    return;
-  }
-  
-  // Success
-  NSError *err = nil;
-  PTAddress *address = [[PTAddress alloc] initWithSockaddr:(struct sockaddr_storage*)&addr];
-  [self startReadingFromConnectedChannel:dispatchChannel error:&err];
-  if (callback) callback(err, address);
+    
+    // get actual address
+    //if (getsockname(fd, (struct sockaddr*)&addr, (socklen_t*)&addr.sin_len) == -1) {
+    //  error = errno;
+    //  close(fd);
+    //  if (callback) callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil], nil);
+    //  return;
+    //}
+    
+    dispatch_io_t dispatchChannel = dispatch_io_create(DISPATCH_IO_STREAM, fd, protocol_.queue, ^(int error) {
+        close(fd);
+        if (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
+            NSError *err = error == 0 ? endError_ : [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil];
+            [delegate_ ioFrameChannel:self didEndWithError:err];
+            endError_ = nil;
+        }
+    });
+    
+    if (!dispatchChannel) {
+        close(fd);
+        if (callback) callback([[NSError alloc] initWithDomain:@"PTError" code:0 userInfo:nil], nil);
+        return;
+    }
+    
+    // Success
+    NSError *err = nil;
+    PTAddress *address = [[PTAddress alloc] initWithSockaddr:(struct sockaddr_storage*)&addr];
+    [self startReadingFromConnectedChannel:dispatchChannel error:&err];
+    if (callback) callback(err, address);
 }
 
 
@@ -287,132 +291,132 @@ static const uint8_t kUserInfoKey;
 
 
 - (void)listenOnPort:(in_port_t)port IPv4Address:(in_addr_t)address callback:(void(^)(NSError *error))callback {
-  if (connState_ != kConnStateNone) {
-    if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
-    return;
-  }
-  
-  assert(dispatchObj_.source == nil);
-  
-  // Create socket
-  dispatch_fd_t fd = socket(AF_INET, SOCK_STREAM, 0);
-  if (fd == -1) {
-    if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil]);
-    return;
-  }
-  
-  // Connect socket
-  struct sockaddr_in addr;
-  bzero((char *)&addr, sizeof(addr));
-  
-  addr.sin_family = AF_INET;
-  addr.sin_port = htons(port);
-  //addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-  //addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  addr.sin_addr.s_addr = htonl(address);
-  
-  socklen_t socklen = sizeof(addr);
-  
-  int on = 1;
-  
-  if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1) {
-    close(fd);
-    if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil]);
-    return;
-  }
-  
-  if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) {
-    close(fd);
-    if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil]);
-    return;
-  }
-  
-  if (bind(fd, (struct sockaddr*)&addr, socklen) != 0) {
-    close(fd);
-    if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil]);
-    return;
-  }
-  
-  if (listen(fd, 512) != 0) {
-    close(fd);
-    if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil]);
-    return;
-  }
-  
-  [self setDispatchSource:dispatch_source_create(DISPATCH_SOURCE_TYPE_READ, fd, 0, protocol_.queue)];
-  
-  dispatch_source_set_event_handler(dispatchObj_.source, ^{
-    unsigned long nconns = dispatch_source_get_data(dispatchObj_.source);
-    while ([self acceptIncomingConnection:fd] && --nconns);
-  });
-  
-  dispatch_source_set_cancel_handler(dispatchObj_.source, ^{
-    // Captures *self*, effectively holding a reference to *self* until cancelled.
-    dispatchObj_.source = nil;
-    close(fd);
-    if (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
-      [delegate_ ioFrameChannel:self didEndWithError:endError_];
-      endError_ = nil;
+    if (connState_ != kConnStateNone) {
+        if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
+        return;
     }
-  });
-  
-  dispatch_resume(dispatchObj_.source);
-  //NSLog(@"%@ opened on fd #%d", self, fd);
-  
-  connState_ = kConnStateListening;
-  if (callback) callback(nil);
+    
+    assert(dispatchObj_.source == nil);
+    
+    // Create socket
+    dispatch_fd_t fd = socket(AF_INET, SOCK_STREAM, 0);
+    if (fd == -1) {
+        if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil]);
+        return;
+    }
+    
+    // Connect socket
+    struct sockaddr_in addr;
+    bzero((char *)&addr, sizeof(addr));
+    
+    addr.sin_family = AF_INET;
+    addr.sin_port = htons(port);
+    //addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
+    //addr.sin_addr.s_addr = htonl(INADDR_ANY);
+    addr.sin_addr.s_addr = htonl(address);
+    
+    socklen_t socklen = sizeof(addr);
+    
+    int on = 1;
+    
+    if (setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, &on, sizeof(on)) == -1) {
+        close(fd);
+        if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil]);
+        return;
+    }
+    
+    if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) {
+        close(fd);
+        if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil]);
+        return;
+    }
+    
+    if (bind(fd, (struct sockaddr*)&addr, socklen) != 0) {
+        close(fd);
+        if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil]);
+        return;
+    }
+    
+    if (listen(fd, 512) != 0) {
+        close(fd);
+        if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil]);
+        return;
+    }
+    
+    [self setDispatchSource:dispatch_source_create(DISPATCH_SOURCE_TYPE_READ, fd, 0, protocol_.queue)];
+    
+    dispatch_source_set_event_handler(dispatchObj_.source, ^{
+        unsigned long nconns = dispatch_source_get_data(dispatchObj_.source);
+        while ([self acceptIncomingConnection:fd] && --nconns);
+    });
+    
+    dispatch_source_set_cancel_handler(dispatchObj_.source, ^{
+        // Captures *self*, effectively holding a reference to *self* until cancelled.
+        dispatchObj_.source = nil;
+        close(fd);
+        if (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
+            [delegate_ ioFrameChannel:self didEndWithError:endError_];
+            endError_ = nil;
+        }
+    });
+    
+    dispatch_resume(dispatchObj_.source);
+    //NSLog(@"%@ opened on fd #%d", self, fd);
+    
+    connState_ = kConnStateListening;
+    if (callback) callback(nil);
 }
 
 
 - (BOOL)acceptIncomingConnection:(dispatch_fd_t)serverSocketFD {
-  struct sockaddr_in addr;
-  socklen_t addrLen = sizeof(addr);
-  dispatch_fd_t clientSocketFD = accept(serverSocketFD, (struct sockaddr*)&addr, &addrLen);
-  
-  if (clientSocketFD == -1) {
-    perror("accept()");
-    return NO;
-  }
-  
-  // prevent SIGPIPE
+    struct sockaddr_in addr;
+    socklen_t addrLen = sizeof(addr);
+    dispatch_fd_t clientSocketFD = accept(serverSocketFD, (struct sockaddr*)&addr, &addrLen);
+    
+    if (clientSocketFD == -1) {
+        perror("accept()");
+        return NO;
+    }
+    
+    // prevent SIGPIPE
 	int on = 1;
 	setsockopt(clientSocketFD, SOL_SOCKET, SO_NOSIGPIPE, &on, sizeof(on));
-  
-  if (fcntl(clientSocketFD, F_SETFL, O_NONBLOCK) == -1) {
-    perror("fcntl(.. O_NONBLOCK)");
-    close(clientSocketFD);
-    return NO;
-  }
-  
-  if (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didAcceptConnection_fromAddress) {
-    PTChannel *channel = [[PTChannel alloc] initWithProtocol:protocol_ delegate:delegate_];
-    dispatch_io_t dispatchChannel = dispatch_io_create(DISPATCH_IO_STREAM, clientSocketFD, protocol_.queue, ^(int error) {
-      // Important note: This block captures *self*, thus a reference is held to
-      // *self* until the fd is truly closed.
-      close(clientSocketFD);
-      
-      if (channel->delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
-        NSError *err = error == 0 ? endError_ : [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil];
-        [channel->delegate_ ioFrameChannel:channel didEndWithError:err];
-        endError_ = nil;
-      }
-    });
     
-    [channel setConnState:kConnStateConnected];
-    [channel setDispatchChannel:dispatchChannel];
-    
-    assert(((struct sockaddr_storage*)&addr)->ss_len == addrLen);
-    PTAddress *address = [[PTAddress alloc] initWithSockaddr:(struct sockaddr_storage*)&addr];
-    [delegate_ ioFrameChannel:self didAcceptConnection:channel fromAddress:address];
-    
-    NSError *err = nil;
-    if (![channel startReadingFromConnectedChannel:dispatchChannel error:&err]) {
-      NSLog(@"startReadingFromConnectedChannel failed in accept: %@", err);
+    if (fcntl(clientSocketFD, F_SETFL, O_NONBLOCK) == -1) {
+        perror("fcntl(.. O_NONBLOCK)");
+        close(clientSocketFD);
+        return NO;
     }
-  } else {
-    close(clientSocketFD);
-  }
-  return YES;
+    
+    if (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didAcceptConnection_fromAddress) {
+        PTChannel *channel = [[PTChannel alloc] initWithProtocol:protocol_ delegate:delegate_];
+        dispatch_io_t dispatchChannel = dispatch_io_create(DISPATCH_IO_STREAM, clientSocketFD, protocol_.queue, ^(int error) {
+            // Important note: This block captures *self*, thus a reference is held to
+            // *self* until the fd is truly closed.
+            close(clientSocketFD);
+            
+            if (channel->delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
+                NSError *err = error == 0 ? endError_ : [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil];
+                [channel->delegate_ ioFrameChannel:channel didEndWithError:err];
+                endError_ = nil;
+            }
+        });
+        
+        [channel setConnState:kConnStateConnected];
+        [channel setDispatchChannel:dispatchChannel];
+        
+        assert(((struct sockaddr_storage*)&addr)->ss_len == addrLen);
+        PTAddress *address = [[PTAddress alloc] initWithSockaddr:(struct sockaddr_storage*)&addr];
+        [delegate_ ioFrameChannel:self didAcceptConnection:channel fromAddress:address];
+        
+        NSError *err = nil;
+        if (![channel startReadingFromConnectedChannel:dispatchChannel error:&err]) {
+            NSLog(@"startReadingFromConnectedChannel failed in accept: %@", err);
+        }
+    } else {
+        close(clientSocketFD);
+    }
+    return YES;
 }
 
 
@@ -420,22 +424,22 @@ static const uint8_t kUserInfoKey;
 
 
 - (void)close {
-  if ((connState_ == kConnStateConnecting || connState_ == kConnStateConnected) && dispatchObj_.channel) {
-    dispatch_io_close(dispatchObj_.channel, DISPATCH_IO_STOP);
-    [self setDispatchChannel:NULL];
-  } else if (connState_ == kConnStateListening && dispatchObj_.source) {
-    dispatch_source_cancel(dispatchObj_.source);
-  }
+    if ((connState_ == kConnStateConnecting || connState_ == kConnStateConnected) && dispatchObj_.channel) {
+        dispatch_io_close(dispatchObj_.channel, DISPATCH_IO_STOP);
+        [self setDispatchChannel:NULL];
+    } else if (connState_ == kConnStateListening && dispatchObj_.source) {
+        dispatch_source_cancel(dispatchObj_.source);
+    }
 }
 
 
 - (void)cancel {
-  if ((connState_ == kConnStateConnecting || connState_ == kConnStateConnected) && dispatchObj_.channel) {
-    dispatch_io_close(dispatchObj_.channel, 0);
-    [self setDispatchChannel:NULL];
-  } else if (connState_ == kConnStateListening && dispatchObj_.source) {
-    dispatch_source_cancel(dispatchObj_.source);
-  }
+    if ((connState_ == kConnStateConnecting || connState_ == kConnStateConnected) && dispatchObj_.channel) {
+        dispatch_io_close(dispatchObj_.channel, 0);
+        [self setDispatchChannel:NULL];
+    } else if (connState_ == kConnStateListening && dispatchObj_.source) {
+        dispatch_source_cancel(dispatchObj_.source);
+    }
 }
 
 
@@ -443,98 +447,98 @@ static const uint8_t kUserInfoKey;
 
 
 - (BOOL)startReadingFromConnectedChannel:(dispatch_io_t)channel error:(__autoreleasing NSError**)error {
-  if (connState_ != kConnStateNone && connState_ != kConnStateConnecting && connState_ != kConnStateConnected) {
-    if (error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil];
-    return NO;
-  }
-  
-  if (dispatchObj_.channel != channel) {
-    [self close];
-    [self setDispatchChannel:channel];
-  }
-  
-  connState_ = kConnStateConnected;
-  
-  // helper
-  BOOL(^handleError)(NSError*,BOOL) = ^BOOL(NSError *error, BOOL isEOS) {
-    if (error) {
-      //NSLog(@"Error while communicating: %@", error);
-      endError_ = error;
-      [self close];
-      return YES;
-    } else if (isEOS) {
-      [self cancel];
-      return YES;
-    }
-    return NO;
-  };
-  
-  [protocol_ readFramesOverChannel:channel onFrame:^(NSError *error, uint32_t type, uint32_t tag, uint32_t payloadSize, dispatch_block_t resumeReadingFrames) {
-    if (handleError(error, type == PTFrameTypeEndOfStream)) {
-      return;
+    if (connState_ != kConnStateNone && connState_ != kConnStateConnecting && connState_ != kConnStateConnected) {
+        if (error) *error = [NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil];
+        return NO;
     }
     
-    BOOL accepted = (channel == dispatchObj_.channel);
-    if (accepted && (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_shouldAcceptFrameOfType_tag_payloadSize)) {
-      accepted = [delegate_ ioFrameChannel:self shouldAcceptFrameOfType:type tag:tag payloadSize:payloadSize];
+    if (dispatchObj_.channel != channel) {
+        [self close];
+        [self setDispatchChannel:channel];
     }
     
-    if (payloadSize == 0) {
-      if (accepted && delegate_) {
-        [delegate_ ioFrameChannel:self didReceiveFrameOfType:type tag:tag payload:nil];
-      } else {
-        // simply ignore the frame
-      }
-      resumeReadingFrames();
-    } else {
-      // has payload
-      if (!accepted) {
-        // Read and discard payload, ignoring frame
-        [protocol_ readAndDiscardDataOfSize:payloadSize overChannel:channel callback:^(NSError *error, BOOL endOfStream) {
-          if (!handleError(error, endOfStream)) {
-            resumeReadingFrames();
-          }
-        }];
-      } else {
-        [protocol_ readPayloadOfSize:payloadSize overChannel:channel callback:^(NSError *error, dispatch_data_t contiguousData, const uint8_t *buffer, size_t bufferSize) {
-          if (handleError(error, bufferSize == 0)) {
+    connState_ = kConnStateConnected;
+    
+    // helper
+    BOOL(^handleError)(NSError*,BOOL) = ^BOOL(NSError *error, BOOL isEOS) {
+        if (error) {
+            //NSLog(@"Error while communicating: %@", error);
+            endError_ = error;
+            [self close];
+            return YES;
+        } else if (isEOS) {
+            [self cancel];
+            return YES;
+        }
+        return NO;
+    };
+    
+    [protocol_ readFramesOverChannel:channel onFrame:^(NSError *error, uint32_t type, uint32_t tag, uint32_t payloadSize, dispatch_block_t resumeReadingFrames) {
+        if (handleError(error, type == PTFrameTypeEndOfStream)) {
             return;
-          }
-          
-          if (delegate_) {
-            PTData *payload = [[PTData alloc] initWithMappedDispatchData:contiguousData data:(void*)buffer length:bufferSize];
-            [delegate_ ioFrameChannel:self didReceiveFrameOfType:type tag:tag payload:payload];
-          }
-          
-          resumeReadingFrames();
-        }];
-      }
-    }
-  }];
-  
-  return YES;
+        }
+        
+        BOOL accepted = (channel == dispatchObj_.channel);
+        if (accepted && (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_shouldAcceptFrameOfType_tag_payloadSize)) {
+            accepted = [delegate_ ioFrameChannel:self shouldAcceptFrameOfType:type tag:tag payloadSize:payloadSize];
+        }
+        
+        if (payloadSize == 0) {
+            if (accepted && delegate_) {
+                [delegate_ ioFrameChannel:self didReceiveFrameOfType:type tag:tag payload:nil];
+            } else {
+                // simply ignore the frame
+            }
+            resumeReadingFrames();
+        } else {
+            // has payload
+            if (!accepted) {
+                // Read and discard payload, ignoring frame
+                [protocol_ readAndDiscardDataOfSize:payloadSize overChannel:channel callback:^(NSError *error, BOOL endOfStream) {
+                    if (!handleError(error, endOfStream)) {
+                        resumeReadingFrames();
+                    }
+                }];
+            } else {
+                [protocol_ readPayloadOfSize:payloadSize overChannel:channel callback:^(NSError *error, dispatch_data_t contiguousData, const uint8_t *buffer, size_t bufferSize) {
+                    if (handleError(error, bufferSize == 0)) {
+                        return;
+                    }
+                    
+                    if (delegate_) {
+                        PTData *payload = [[PTData alloc] initWithMappedDispatchData:contiguousData data:(void*)buffer length:bufferSize];
+                        [delegate_ ioFrameChannel:self didReceiveFrameOfType:type tag:tag payload:payload];
+                    }
+                    
+                    resumeReadingFrames();
+                }];
+            }
+        }
+    }];
+    
+    return YES;
 }
 
 
 #pragma mark - Sending
 
 - (void)sendFrameOfType:(uint32_t)frameType tag:(uint32_t)tag withPayload:(dispatch_data_t)payload callback:(void(^)(NSError *error))callback {
-  if (connState_ == kConnStateConnecting || connState_ == kConnStateConnected) {
-    [protocol_ sendFrameOfType:frameType tag:tag withPayload:payload overChannel:dispatchObj_.channel callback:callback];
-  } else if (callback) {
-    callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
-  }
+    if (connState_ == kConnStateConnecting || connState_ == kConnStateConnected) {
+        [protocol_ sendFrameOfType:frameType tag:tag withPayload:payload overChannel:dispatchObj_.channel callback:callback];
+    } else if (callback) {
+        callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
+    }
 }
 
 #pragma mark - NSObject
 
 - (NSString*)description {
-  id userInfo = objc_getAssociatedObject(self, (void*)&kUserInfoKey);
-  return [NSString stringWithFormat:@"<PTChannel: %p (%@)%s%@>", self, (  connState_ == kConnStateConnecting ? @"connecting"
-                                                                    : connState_ == kConnStateConnected  ? @"connected" 
-                                                                    : connState_ == kConnStateListening  ? @"listening"
-                                                                    :                                      @"closed"),
-          userInfo ? " " : "", userInfo ? userInfo : @""];
+    id userInfo = objc_getAssociatedObject(self, (void*)&kUserInfoKey);
+    return [NSString stringWithFormat:@"<PTChannel: %p (%@)%s%@>", self, (  connState_ == kConnStateConnecting ? @"connecting"
+                                                                          : connState_ == kConnStateConnected  ? @"connected" 
+                                                                          : connState_ == kConnStateListening  ? @"listening"
+                                                                          :                                      @"closed"),
+            userInfo ? " " : "", userInfo ? userInfo : @""];
 }
 
 
@@ -545,51 +549,51 @@ static const uint8_t kUserInfoKey;
 @implementation PTAddress
 
 - (id)initWithSockaddr:(const struct sockaddr_storage*)addr {
-  if (!(self = [super init])) return nil;
-  assert(addr);
-  memcpy((void*)&sockaddr_, (const void*)addr, addr->ss_len);  
-  return self;
+    if (!(self = [super init])) return nil;
+    assert(addr);
+    memcpy((void*)&sockaddr_, (const void*)addr, addr->ss_len);  
+    return self;
 }
 
 
 - (NSString*)name {
-  if (sockaddr_.ss_len) {
-    const void *sin_addr = NULL;
-    size_t bufsize = 0;
-    if (sockaddr_.ss_family == AF_INET6) {
-      bufsize = INET6_ADDRSTRLEN;
-      sin_addr = (const void *)&((const struct sockaddr_in6*)&sockaddr_)->sin6_addr;
+    if (sockaddr_.ss_len) {
+        const void *sin_addr = NULL;
+        size_t bufsize = 0;
+        if (sockaddr_.ss_family == AF_INET6) {
+            bufsize = INET6_ADDRSTRLEN;
+            sin_addr = (const void *)&((const struct sockaddr_in6*)&sockaddr_)->sin6_addr;
+        } else {
+            bufsize = INET_ADDRSTRLEN;
+            sin_addr = (const void *)&((const struct sockaddr_in*)&sockaddr_)->sin_addr;
+        }
+        char *buf = CFAllocatorAllocate(kCFAllocatorDefault, bufsize+1, 0);
+        if (inet_ntop(sockaddr_.ss_family, sin_addr, buf, bufsize-1) == NULL) {
+            CFAllocatorDeallocate(kCFAllocatorDefault, buf);
+            return nil;
+        }
+        return [[NSString alloc] initWithBytesNoCopy:(void*)buf length:strlen(buf) encoding:NSUTF8StringEncoding freeWhenDone:YES];
     } else {
-      bufsize = INET_ADDRSTRLEN;
-      sin_addr = (const void *)&((const struct sockaddr_in*)&sockaddr_)->sin_addr;
+        return nil;
     }
-    char *buf = CFAllocatorAllocate(kCFAllocatorDefault, bufsize+1, 0);
-    if (inet_ntop(sockaddr_.ss_family, sin_addr, buf, bufsize-1) == NULL) {
-      CFAllocatorDeallocate(kCFAllocatorDefault, buf);
-      return nil;
-    }
-    return [[NSString alloc] initWithBytesNoCopy:(void*)buf length:strlen(buf) encoding:NSUTF8StringEncoding freeWhenDone:YES];
-  } else {
-    return nil;
-  }
 }
 
 
 - (NSInteger)port {
-  if (sockaddr_.ss_len) {
-    return ntohs(PT_SOCKADDR_ACCESS(&sockaddr_, sin_port, sin6_port));
-  } else {
-    return 0;
-  }
+    if (sockaddr_.ss_len) {
+        return ntohs(PT_SOCKADDR_ACCESS(&sockaddr_, sin_port, sin6_port));
+    } else {
+        return 0;
+    }
 }
 
 
 - (NSString*)description {
-  if (sockaddr_.ss_len) {
-    return [NSString stringWithFormat:@"%@:%u", self.name, self.port];
-  } else {
-    return @"(?)";
-  }
+    if (sockaddr_.ss_len) {
+        return [NSString stringWithFormat:@"%@:%u", self.name, self.port];
+    } else {
+        return @"(?)";
+    }
 }
 
 @end
@@ -603,24 +607,28 @@ static const uint8_t kUserInfoKey;
 @synthesize length = length_;
 
 - (id)initWithMappedDispatchData:(dispatch_data_t)mappedContiguousData data:(void*)data length:(size_t)length {
-  if (!(self = [super init])) return nil;
-  dispatchData_ = mappedContiguousData;
-  if (dispatchData_) dispatch_retain(dispatchData_);
-  data_ = data;
-  length_ = length;
-  return self;
+    if (!(self = [super init])) return nil;
+    dispatchData_ = mappedContiguousData;
+    if (dispatchData_) dispatch_retain(dispatchData_);
+    data_ = data;
+    length_ = length;
+    return self;
 }
 
 - (void)dealloc {
-  if (dispatchData_) dispatch_release(dispatchData_);
-  data_ = NULL;
-  length_ = 0;
+    if (dispatchData_) dispatch_release(dispatchData_);
+    data_ = NULL;
+    length_ = 0;
+    
+    #if !__has_feature(objc_arc)
+        [super dealloc];
+    #endif
 }
 
 #pragma mark - NSObject
 
 - (NSString*)description {
-  return [NSString stringWithFormat:@"<PTData: %p (%zu bytes)>", self, length_];
+    return [NSString stringWithFormat:@"<PTData: %p (%zu bytes)>", self, length_];
 }
 
 @end
