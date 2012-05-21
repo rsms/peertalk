@@ -94,6 +94,10 @@ static const uint8_t kUserInfoKey;
 - (void)dealloc {
   if (dispatchObj_.channel) dispatch_release(dispatchObj_.channel);
   else if (dispatchObj_.source) dispatch_release(dispatchObj_.source);
+  
+#if !__has_feature(objc_arc)
+  [super dealloc];
+#endif
 }
 
 
@@ -615,6 +619,10 @@ static const uint8_t kUserInfoKey;
   if (dispatchData_) dispatch_release(dispatchData_);
   data_ = NULL;
   length_ = 0;
+  
+#if !__has_feature(objc_arc)
+  [super dealloc];
+#endif
 }
 
 #pragma mark - NSObject

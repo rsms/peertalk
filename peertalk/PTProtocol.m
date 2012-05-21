@@ -83,6 +83,10 @@ static void _release_queue_local_protocol(void *objcobj) {
   if (queue_) {
     dispatch_release(queue_);
   }
+  
+#if !__has_feature(objc_arc)
+  [super dealloc];
+#endif
 }
 
 - (dispatch_queue_t)queue {
@@ -302,6 +306,10 @@ static void _release_queue_local_protocol(void *objcobj) {
 }
 - (void)dealloc {
   if (dispatchData_) dispatch_release(dispatchData_);
+  
+#if !__has_feature(objc_arc)
+  [super dealloc];
+#endif
 }
 @end
 
