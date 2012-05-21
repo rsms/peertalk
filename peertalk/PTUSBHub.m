@@ -301,6 +301,10 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
     dispatch_release(channel_);
     channel_ = nil;
   }
+  
+#if !__has_feature(objc_arc)
+  [super dealloc];
+#endif
 }
 
 
