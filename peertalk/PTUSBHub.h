@@ -34,8 +34,8 @@ NSString *PTUSBHubErrorDomain;
 
 // Error codes returned with NSError.code for NSError domain PTUSBHubErrorDomain
 typedef enum {
-  PTUSBHubErrorBadDevice = 2,
-  PTUSBHubErrorConnectionRefused = 3,
+    PTUSBHubErrorBadDevice = 2,
+    PTUSBHubErrorConnectionRefused = 3,
 } PTUSBHubError;
 
 @interface PTUSBHub : NSObject
