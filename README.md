@@ -2,6 +2,8 @@
 
 PeerTalk is a iOS and OS X Cocoa library for communicating over USB and TCP.
 
+> Note: Several people have reported that Apple doesn't officially support the technology on which PeerTalk is built, when submitting apps using PeerTalk to the App Store. Be adviced that the capacity you might want to use this will be limited to corporate "internal app stores" and individual developers, rather than a public audience. (It's a shame that Apple has dropped support for any wired communication starting with the iPhone 5.)
+
 #### Highlights
 
 1. Provides you with USB device attach/detach events and attached device's info
