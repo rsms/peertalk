@@ -1,4 +1,5 @@
 #import "PTProtocol.h"
+#import "PTPrivate.h"
 #import <objc/runtime.h>
 
 static const uint32_t PTProtocolVersion1 = 1;
@@ -71,17 +72,21 @@ static void _release_queue_local_protocol(void *objcobj) {
 - (id)initWithDispatchQueue:(dispatch_queue_t)queue {
   if (!(self = [super init])) return nil;
   queue_ = queue;
+#if PT_DISPATCH_RETAIN_RELEASE
   if (queue_) dispatch_retain(queue_);
+#endif
   return self;
 }
 
 - (id)init {
-  return [self initWithDispatchQueue:dispatch_get_current_queue()];
+  return [self initWithDispatchQueue:dispatch_get_main_queue()];
 }
 
 - (void)dealloc {
   if (queue_) {
+#if PT_DISPATCH_RETAIN_RELEASE
     dispatch_release(queue_);
+#endif
   }
 }
 
@@ -90,10 +95,14 @@ static void _release_queue_local_protocol(void *objcobj) {
 }
 
 - (void)setQueue:(dispatch_queue_t)queue {
+#if PT_DISPATCH_RETAIN_RELEASE
   dispatch_queue_t prev_queue = queue_;
   queue_ = queue;
   if (queue_) dispatch_retain(queue_);
   if (prev_queue) dispatch_release(prev_queue);
+#else
+  queue_ = queue;
+#endif
 }
 
 
@@ -127,7 +136,9 @@ static void _release_queue_local_protocol(void *objcobj) {
   if (payload && frame->payloadSize != 0) {
     // chain frame + payload
     dispatch_data_t data = dispatch_data_create_concat(frameData, payload);
+#if PT_DISPATCH_RETAIN_RELEASE
     dispatch_release(frameData);
+#endif
     frameData = data;
   }
   
@@ -146,7 +157,9 @@ static void _release_queue_local_protocol(void *objcobj) {
       callback(_errno == 0 ? nil : [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:_errno userInfo:nil]);
     }
   });
+#if PT_DISPATCH_RETAIN_RELEASE
   dispatch_release(frame);
+#endif
 }
 
 
@@ -164,11 +177,17 @@ static void _release_queue_local_protocol(void *objcobj) {
     if (dataSize) {
       if (!allData) {
         allData = data;
+#if PT_DISPATCH_RETAIN_RELEASE
         dispatch_retain(allData);
+#endif
       } else {
+#if PT_DISPATCH_RETAIN_RELEASE
         dispatch_data_t allDataPrev = allData;
         allData = dispatch_data_create_concat(allData, data);
         dispatch_release(allDataPrev);
+#else
+        allData = dispatch_data_create_concat(allData, data);
+#endif
       }
     }
     
@@ -184,7 +203,9 @@ static void _release_queue_local_protocol(void *objcobj) {
       }
       
       if (!allData || dispatch_data_get_size(allData) < sizeof(PTFrame)) {
+#if PT_DISPATCH_RETAIN_RELEASE
         if (allData) dispatch_release(allData);
+#endif
         callback([[NSError alloc] initWithDomain:PTProtocolErrorDomain code:0 userInfo:nil], 0, 0, 0);
         return;
       }
@@ -192,8 +213,10 @@ static void _release_queue_local_protocol(void *objcobj) {
       PTFrame *frame = NULL;
       size_t size = 0;
       
-      dispatch_data_t contiguousData = dispatch_data_create_map(allData, (const void **)&frame, &size);
+      PT_PRECISE_LIFETIME dispatch_data_t contiguousData = dispatch_data_create_map(allData, (const void **)&frame, &size); // precise lifetime guarantees bytes in frame will stay valid till the end of scope
+#if PT_DISPATCH_RETAIN_RELEASE
       dispatch_release(allData);
+#endif
       if (!contiguousData) {
         callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:ENOMEM userInfo:nil], 0, 0, 0);
         return;
@@ -209,7 +232,9 @@ static void _release_queue_local_protocol(void *objcobj) {
         callback(nil, frame->type, frame->tag, frame->payloadSize);
       }
       
+#if PT_DISPATCH_RETAIN_RELEASE
       dispatch_release(contiguousData);
+#endif
     }
   });
 }
@@ -224,34 +249,46 @@ static void _release_queue_local_protocol(void *objcobj) {
     if (dataSize) {
       if (!allData) {
         allData = data;
+#if PT_DISPATCH_RETAIN_RELEASE
         dispatch_retain(allData);
+#endif
       } else {
+#if PT_DISPATCH_RETAIN_RELEASE
         dispatch_data_t allDataPrev = allData;
         allData = dispatch_data_create_concat(allData, data);
         dispatch_release(allDataPrev);
+#else
+        allData = dispatch_data_create_concat(allData, data);
+#endif
       }
     }
     
     if (done) {
       if (error != 0) {
+#if PT_DISPATCH_RETAIN_RELEASE
         if (allData) dispatch_release(allData);
+#endif
         callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil], NULL, NULL, 0);
         return;
       }
       
       if (dataSize == 0) {
+#if PT_DISPATCH_RETAIN_RELEASE
         if (allData) dispatch_release(allData);
+#endif
         callback(nil, NULL, NULL, 0);
         return;
       }
       
       uint8_t *buffer = NULL;
       size_t bufferSize = 0;
-      dispatch_data_t contiguousData = NULL;
+      PT_PRECISE_LIFETIME dispatch_data_t contiguousData = NULL;
       
       if (allData) {
         contiguousData = dispatch_data_create_map(allData, (const void **)&buffer, &bufferSize);
+#if PT_DISPATCH_RETAIN_RELEASE
         dispatch_release(allData); allData = NULL;
+#endif
         if (!contiguousData) {
           callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:ENOMEM userInfo:nil], NULL, NULL, 0);
           return;
@@ -259,7 +296,9 @@ static void _release_queue_local_protocol(void *objcobj) {
       }
       
       callback(nil, contiguousData, buffer, bufferSize);
+#if PT_DISPATCH_RETAIN_RELEASE
       if (contiguousData) dispatch_release(contiguousData);
+#endif
     }
   });
 }
@@ -297,11 +336,15 @@ static void _release_queue_local_protocol(void *objcobj) {
 - (id)initWithDispatchData:(dispatch_data_t)dispatchData {
   if (!(self = [super init])) return nil;
   dispatchData_ = dispatchData;
+#if PT_DISPATCH_RETAIN_RELEASE
   dispatch_retain(dispatchData_);
+#endif
   return self;
 }
 - (void)dealloc {
+#if PT_DISPATCH_RETAIN_RELEASE
   if (dispatchData_) dispatch_release(dispatchData_);
+#endif
 }
 @end
 
@@ -311,7 +354,7 @@ static void _release_queue_local_protocol(void *objcobj) {
   // Note: The queue is used to submit the destructor. Since we only perform an
   // atomic release of self, it doesn't really matter which queue is used, thus
   // we use the current calling queue.
-  return dispatch_data_create((const void*)self.bytes, self.length, dispatch_get_current_queue(), ^{
+  return dispatch_data_create((const void*)self.bytes, self.length, dispatch_get_main_queue(), ^{
     // trick to have the block capture the data, thus retain/releasing
     [self length];
   });
@@ -323,14 +366,16 @@ static void _release_queue_local_protocol(void *objcobj) {
   }
   uint8_t *buffer = NULL;
   size_t bufferSize = 0;
-  dispatch_data_t contiguousData = dispatch_data_create_map(data, (const void **)&buffer, &bufferSize);
+  PT_PRECISE_LIFETIME dispatch_data_t contiguousData = dispatch_data_create_map(data, (const void **)&buffer, &bufferSize);
   if (!contiguousData) {
     return nil;
   }
   
   _PTDispatchData *dispatchDataRef = [[_PTDispatchData alloc] initWithDispatchData:contiguousData];
   NSData *newData = [NSData dataWithBytesNoCopy:(void*)buffer length:bufferSize freeWhenDone:NO];
+#if PT_DISPATCH_RETAIN_RELEASE
   dispatch_release(contiguousData);
+#endif
   static const bool kDispatchDataRefKey;
   objc_setAssociatedObject(newData, (const void*)kDispatchDataRefKey, dispatchDataRef, OBJC_ASSOCIATION_RETAIN);
   
@@ -360,12 +405,14 @@ static void _release_queue_local_protocol(void *objcobj) {
   }
   uint8_t *buffer = NULL;
   size_t bufferSize = 0;
-  dispatch_data_t contiguousData = dispatch_data_create_map(data, (const void **)&buffer, &bufferSize);
+  PT_PRECISE_LIFETIME dispatch_data_t contiguousData = dispatch_data_create_map(data, (const void **)&buffer, &bufferSize);
   if (!contiguousData) {
     return nil;
   }
   NSDictionary *dict = [NSPropertyListSerialization propertyListWithData:[NSData dataWithBytesNoCopy:(void*)buffer length:bufferSize freeWhenDone:NO] options:NSPropertyListImmutable format:NULL error:nil];
+#if PT_DISPATCH_RETAIN_RELEASE
   dispatch_release(contiguousData);
+#endif
   return dict;
 }
 
