@@ -1,4 +1,5 @@
 #import "PTUSBHub.h"
+#import "PTPrivate.h"
 
 #include <netinet/in.h>
 #include <sys/socket.h>
@@ -85,7 +86,7 @@ static usbmux_packet_t *usbmux_packet_create(USBMuxPacketProtocol protocol, USBM
   upacket->tag = tag;
   
   if (payload && payloadSize) {
-    usbmux_packet_set_payload(upacket, payload, payloadSize);
+    usbmux_packet_set_payload(upacket, payload, (uint32_t)payloadSize);
   }
   
   return upacket;
@@ -214,7 +215,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
   PTUSBChannel *channel = [PTUSBChannel new];
   NSError *error = nil;
   
-  if (![channel openOnQueue:dispatch_get_current_queue() error:&error onEnd:onEnd]) {
+  if (![channel openOnQueue:dispatch_get_main_queue() error:&error onEnd:onEnd]) {
     onStart(error, nil);
     return;
   }
@@ -298,7 +299,9 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 - (void)dealloc {
   //NSLog(@"dealloc %@", self);
   if (channel_) {
+#if PT_DISPATCH_RETAIN_RELEASE
     dispatch_release(channel_);
+#endif
     channel_ = nil;
   }
 }
@@ -320,8 +323,9 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 
 
 - (BOOL)openOnQueue:(dispatch_queue_t)queue error:(NSError**)error onEnd:(void(^)(NSError*))onEnd {
+  assert(queue != nil);
   assert(channel_ == nil);
-  queue_ = queue ? queue : dispatch_get_current_queue();
+  queue_ = queue;
   
   // Create socket
   dispatch_fd_t fd = socket(AF_UNIX, SOCK_STREAM, 0);
@@ -382,7 +386,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
       return NO;
     }
     
-    USBMuxReplyCode replyCode = n.integerValue;
+    USBMuxReplyCode replyCode = (USBMuxReplyCode)n.integerValue;
     if (replyCode != 0) {
       NSString *errmessage = @"Unspecified error";
       switch (replyCode) {
@@ -478,10 +482,12 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
     uint32_t upacket_len = 0;
     char *buffer = NULL;
     size_t buffer_size = 0;
-    dispatch_data_t map_data = dispatch_data_create_map(data, (const void **)&buffer, &buffer_size);
+    PT_PRECISE_LIFETIME_UNUSED dispatch_data_t map_data = dispatch_data_create_map(data, (const void **)&buffer, &buffer_size); // objc_precise_lifetime guarantees 'map_data' isn't released before memcpy has a chance to do its thing
     assert(buffer_size == sizeof(ref_upacket.size));
     memcpy((void *)&(upacket_len), (const void *)buffer, buffer_size);
+#if PT_DISPATCH_RETAIN_RELEASE
     dispatch_release(map_data);
+#endif
     
     // Allocate a new usbmux_packet_t for the expected size
     uint32_t payloadLength = upacket_len - sizeof(usbmux_packet_t);
@@ -506,10 +512,12 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
       // Copy read bytes onto our usbmux_packet_t
       char *buffer = NULL;
       size_t buffer_size = 0;
-      dispatch_data_t map_data = dispatch_data_create_map(data, (const void **)&buffer, &buffer_size);
+      PT_PRECISE_LIFETIME_UNUSED dispatch_data_t map_data = dispatch_data_create_map(data, (const void **)&buffer, &buffer_size);
       assert(buffer_size == upacket->size - offset);
       memcpy(((void *)(upacket))+offset, (const void *)buffer, buffer_size);
+#if PT_DISPATCH_RETAIN_RELEASE
       dispatch_release(map_data);
+#endif
       
       // We only support plist protocol
       if (upacket->protocol != USBMuxPacketProtocolPlist) {
@@ -576,7 +584,9 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
       callback(err);
     }
   });
+#if PT_DISPATCH_RETAIN_RELEASE
   dispatch_release(data); // Release our ref. A ref is still held by dispatch_io_write
+#endif
 }
 
 
