@@ -1,6 +1,24 @@
 # peertalk
 
-PeerTalk is a iOS and OS X Cocoa library for communicating over USB and TCP.
+PeerTalk is an iOS and Mac Cocoa library for communicating over USB.
+
+    
+                             ┌──────────────────────────────┐
+                             │ ┌──────────────────────────┐ │
+                             │ │                          │ │
+      ┌─────────┐            │ │                          │ │
+      │┌───────┐│            │ │          Hello           │ │
+      ││       ││            │ │                          │ │
+      ││ Hello ││            │ │                          │ │
+      ││       ││            │ │                          │ │
+      │└───────┘│            │ └──────────────────────────┘ │
+      │    ⃝    │            \  ─────────────────────────── \
+      └────╦────┘             \  \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+           ║         ╔══════════■ \ \ \ \ \ \ \ \ \ \ \ \ \ \ \
+           ╚═════════╝          \  ─────────────────────────── \
+          - meep -               └─────────────────────────────┘
+             - beep -
+    
 
 #### Highlights
 
@@ -17,9 +35,13 @@ PeerTalk is a iOS and OS X Cocoa library for communicating over USB and TCP.
 Grab the goods from [https://github.com/rsms/peertalk](https://github.com/rsms/peertalk)
 
 
-### Note on Apple App Store
+### Usage in Apple App Store
 
-PeerTalk has successfully been released on both the iOS and OS X app stores as the driver for [DeviceSync](https://itunes.apple.com/app/devicesync-for-ios/id737867459), a simple app that copies contact data from iOS to OS X ([iOS source](https://github.com/yep/DeviceSync-for-iOS), [OS X source](https://github.com/yep/DeviceSync-for-OS-X)). This means that you can probably use PeerTalk for apps aiming for the App Store. Note however that there has been several reports of app submissions with PeerTalk that have been denied publication in the app stores.
+PeerTalk has successfully been released on both the iOS and OS X app store.
+
+A great example is [Duet Display](http://www.duetdisplay.com/) which is a fantastic piece of software allowing you to use your iDevice as an extra display for your Mac using the Lightning or 30-pin cable.
+
+This *probably* means that you can use PeerTalk for apps aiming at the App Store. Note however that there has been some reports of app submissions which make use of PeerTalk that have been denied publication in the app stores (although more recently we've only heard reports of success.)
 
 ## Getting started
 
