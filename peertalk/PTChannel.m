@@ -390,28 +390,31 @@ static const uint8_t kUserInfoKey;
   }
   
   if (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didAcceptConnection_fromAddress) {
-    PTChannel *channel = [[PTChannel alloc] initWithProtocol:protocol_ delegate:delegate_];
+    PTChannel *peerChannel = [[PTChannel alloc] initWithProtocol:protocol_ delegate:delegate_];
+    __block PTChannel *localChannelRef = self;
     dispatch_io_t dispatchChannel = dispatch_io_create(DISPATCH_IO_STREAM, clientSocketFD, protocol_.queue, ^(int error) {
       // Important note: This block captures *self*, thus a reference is held to
       // *self* until the fd is truly closed.
+      localChannelRef = nil;
+
       close(clientSocketFD);
       
-      if (channel->delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
-        NSError *err = error == 0 ? endError_ : [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil];
-        [channel->delegate_ ioFrameChannel:channel didEndWithError:err];
-        endError_ = nil;
+      if (peerChannel->delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
+        NSError *err = error == 0 ? peerChannel->endError_ : [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil];
+        [peerChannel->delegate_ ioFrameChannel:peerChannel didEndWithError:err];
+        peerChannel->endError_ = nil;
       }
     });
     
-    [channel setConnState:kConnStateConnected];
-    [channel setDispatchChannel:dispatchChannel];
+    [peerChannel setConnState:kConnStateConnected];
+    [peerChannel setDispatchChannel:dispatchChannel];
     
     assert(((struct sockaddr_storage*)&addr)->ss_len == addrLen);
     PTAddress *address = [[PTAddress alloc] initWithSockaddr:(struct sockaddr_storage*)&addr];
-    [delegate_ ioFrameChannel:self didAcceptConnection:channel fromAddress:address];
+    [delegate_ ioFrameChannel:self didAcceptConnection:peerChannel fromAddress:address];
     
     NSError *err = nil;
-    if (![channel startReadingFromConnectedChannel:dispatchChannel error:&err]) {
+    if (![peerChannel startReadingFromConnectedChannel:dispatchChannel error:&err]) {
       NSLog(@"startReadingFromConnectedChannel failed in accept: %@", err);
     }
   } else {
