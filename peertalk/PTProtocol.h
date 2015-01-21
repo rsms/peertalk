@@ -22,7 +22,7 @@ static const uint32_t PTFrameNoTag = 0;
 static const uint32_t PTFrameTypeEndOfStream = 0;
 
 // NSError domain
-NSString *PTProtocolErrorDomain;
+FOUNDATION_EXPORT NSString const *PTProtocolErrorDomain;
 
 
 @interface PTProtocol : NSObject
