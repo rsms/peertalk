@@ -4,7 +4,7 @@
 
 static const uint32_t PTProtocolVersion1 = 1;
 
-NSString const *PTProtocolErrorDomain = @"PTProtocolError";
+NSString * const PTProtocolErrorDomain = @"PTProtocolError";
 
 // This is what we send as the header for each frame.
 typedef struct _PTFrame {
