@@ -7,7 +7,7 @@
 #include <sys/un.h>
 #include <err.h>
 
-NSString const *PTUSBHubErrorDomain = @"PTUSBHubError";
+NSString * const PTUSBHubErrorDomain = @"PTUSBHubError";
 
 typedef uint32_t USBMuxPacketType;
 enum {
@@ -98,8 +98,8 @@ static void usbmux_packet_free(usbmux_packet_t *upacket) {
 }
 
 
-NSString const *PTUSBDeviceDidAttachNotification = @"PTUSBDeviceDidAttachNotification";
-NSString const *PTUSBDeviceDidDetachNotification = @"PTUSBDeviceDidDetachNotification";
+NSString * const PTUSBDeviceDidAttachNotification = @"PTUSBDeviceDidAttachNotification";
+NSString * const PTUSBDeviceDidDetachNotification = @"PTUSBDeviceDidDetachNotification";
 
 static NSString *kPlistPacketTypeListen = @"Listen";
 static NSString *kPlistPacketTypeConnect = @"Connect";
