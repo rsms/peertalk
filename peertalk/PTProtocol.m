@@ -350,6 +350,9 @@ static void _release_queue_local_protocol(void *objcobj) {
 
 @implementation NSData (PTProtocol)
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-getter-return-value"
+
 - (dispatch_data_t)createReferencingDispatchData {
   // Note: The queue is used to submit the destructor. Since we only perform an
   // atomic release of self, it doesn't really matter which queue is used, thus
@@ -359,6 +362,8 @@ static void _release_queue_local_protocol(void *objcobj) {
     [self length];
   });
 }
+
+#pragma clang diagnostic pop
 
 + (NSData *)dataWithContentsOfDispatchData:(dispatch_data_t)data {
   if (!data) {

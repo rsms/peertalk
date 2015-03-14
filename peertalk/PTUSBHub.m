@@ -589,6 +589,8 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 #endif
 }
 
+#pragma clang diagnostic push
+#pragma clang diagnostic ignored "-Wunused-getter-return-value"
 
 - (void)sendData:(NSData*)data callback:(void(^)(NSError*))callback {
   dispatch_data_t ddata = dispatch_data_create((const void*)data.bytes, data.length, queue_, ^{
@@ -598,6 +600,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
   [self sendDispatchData:ddata callback:callback];
 }
 
+#pragma clang diagnostic pop
 
 - (void)readFromOffset:(off_t)offset length:(size_t)length callback:(void(^)(NSError *error, dispatch_data_t data))callback {
   dispatch_io_read(channel_, offset, length, queue_, ^(bool done, dispatch_data_t data, int _errno) {
