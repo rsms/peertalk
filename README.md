@@ -41,7 +41,9 @@ PeerTalk has successfully been released on both the iOS and OS X app store.
 
 A great example is [Duet Display](http://www.duetdisplay.com/) which is a fantastic piece of software allowing you to use your iDevice as an extra display for your Mac using the Lightning or 30-pin cable.
 
-This *probably* means that you can use PeerTalk for apps aiming at the App Store. Note however that there has been some reports of app submissions which make use of PeerTalk that have been denied publication in the app stores (although more recently we've only heard reports of success.)
+Facebook's [Origami](http://facebook.github.io/origami/) uses PeerTalk for it's Origami Live iOS app (in fact, this is where PeerTalk was first used, back in 2012)
+
+This *probably* means that you can use PeerTalk for apps aiming at the App Store.
 
 ## Getting started
 
