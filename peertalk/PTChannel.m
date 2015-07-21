@@ -190,7 +190,7 @@ static const uint8_t kUserInfoKey;
 #pragma mark - Connecting
 
 
-- (void)connectToPort:(uint32_t)port overUSBHub:(PTUSBHub*)usbHub deviceID:(NSNumber*)deviceID callback:(void(^)(NSError *error))callback {
+- (void)connectToPort:(uint16_t)port overUSBHub:(PTUSBHub*)usbHub deviceID:(NSNumber*)deviceID callback:(void(^)(NSError *error))callback {
   assert(protocol_ != NULL);
   if (connState_ != kConnStateNone) {
     if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
@@ -214,7 +214,7 @@ static const uint8_t kUserInfoKey;
 }
 
 
-- (void)connectToPort:(uint32_t)port IPv4Address:(NSString*)address callback:(void(^)(NSError *error, PTAddress *address))callback {
+- (void)connectToPort:(uint16_t)port IPv4Address:(NSString*)address callback:(void(^)(NSError *error, PTAddress *address))callback {
   // Validate IPv4Address
   struct in_addr sin_addr;
   if (inet_aton(address.UTF8String, &sin_addr) != 1) {
@@ -304,7 +304,7 @@ static const uint8_t kUserInfoKey;
 #pragma mark - Listening and serving
 
 
-- (void)listenOnPort:(uint32_t)port IPv4Address:(NSString*)address callback:(void(^)(NSError *error))callback {
+- (void)listenOnPort:(uint16_t)port IPv4Address:(NSString*)address callback:(void(^)(NSError *error))callback {
   // Validate IPv4Address
   struct in_addr sin_addr;
   if (inet_aton(address.UTF8String, &sin_addr) != 1) {
