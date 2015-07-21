@@ -53,7 +53,7 @@
 
 // Connect to a TCP port at IPv4 address. INADDR_LOOPBACK can be used as address
 // to connect to the local host.
-- (void)connectToPort:(in_port_t)port IPv4Address:(in_addr_t)address callback:(void(^)(NSError *error, PTAddress *address))callback;
+- (void)connectToPort:(uint32_t)port IPv4Address:(NSString*)address callback:(void(^)(NSError *error, PTAddress *address))callback;
 
 // Listen for connections on port and address, effectively starting a socket
 // server. For this to make sense, you should provide a onAccept block handler
