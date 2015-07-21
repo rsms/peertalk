@@ -292,6 +292,19 @@ static const uint8_t kUserInfoKey;
 
 
 - (void)listenOnPort:(uint32_t)port IPv4Address:(NSString*)address callback:(void(^)(NSError *error))callback {
+  // Validate IPv4Address
+  struct in_addr sin_addr;
+  if (inet_aton(address.UTF8String, &sin_addr) != 1) {
+    if (callback) callback([NSError errorWithDomain:@"PTError"
+                                               code:1
+                                           userInfo:@{
+                            NSLocalizedDescriptionKey: NSLocalizedString(@"Invalid IPv4 Address", nil),
+                     NSLocalizedFailureReasonErrorKey: NSLocalizedString(address, nil),
+                NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString(@"Use a valid IPv4 Address", nil)
+                            }]);
+    return;
+  }
+
   if (connState_ != kConnStateNone) {
     if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
     return;
@@ -314,19 +327,6 @@ static const uint8_t kUserInfoKey;
   addr.sin_port = htons(port);
   //addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
   //addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  struct in_addr sin_addr;
-  if (inet_aton(address.UTF8String, &sin_addr) != 1) {
-    close(fd);
-    if (callback) callback([NSError errorWithDomain:@"PTError"
-                                               code:1
-                                           userInfo:@{
-                            NSLocalizedDescriptionKey: NSLocalizedString(@"Invalid IPv4 Address", nil),
-                     NSLocalizedFailureReasonErrorKey: NSLocalizedString(address, nil),
-                NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString(@"Use a valid IPv4 Address", nil)
-                            }]);
-    return;
-  }
-
   addr.sin_addr = sin_addr;
   
   socklen_t socklen = sizeof(addr);
