@@ -384,7 +384,7 @@
 		6A88FA27150D613800FC3647 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0430;
+				LastUpgradeCheck = 0640;
 			};
 			buildConfigurationList = 6A88FA2A150D613800FC3647 /* Build configuration list for PBXProject "peertalk" */;
 			compatibilityVersion = "Xcode 3.2";
