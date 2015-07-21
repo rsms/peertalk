@@ -317,7 +317,13 @@ static const uint8_t kUserInfoKey;
   struct in_addr sin_addr;
   if (inet_aton(address.UTF8String, &sin_addr) != 1) {
     close(fd);
-    if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil]);
+    if (callback) callback([NSError errorWithDomain:@"PTError"
+                                               code:1
+                                           userInfo:@{
+                            NSLocalizedDescriptionKey: NSLocalizedString(@"Invalid IPv4 Address", nil),
+                     NSLocalizedFailureReasonErrorKey: NSLocalizedString(address, nil),
+                NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString(@"Use a valid IPv4 Address", nil)
+                            }]);
     return;
   }
 
