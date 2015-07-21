@@ -3,10 +3,10 @@
 #define PT_DISPATCH_RETAIN_RELEASE 1
 #endif
 
+#if !defined(PT_DISPATCH_RETAIN_RELEASE)
 #define PT_PRECISE_LIFETIME
 #define PT_PRECISE_LIFETIME_UNUSED
-
-#if defined(PT_DISPATCH_RETAIN_RELEASE) && PT_DISPATCH_RETAIN_RELEASE
+#else
 #define PT_PRECISE_LIFETIME __attribute__((objc_precise_lifetime))
 #define PT_PRECISE_LIFETIME_UNUSED __attribute__((objc_precise_lifetime, unused))
 #endif
