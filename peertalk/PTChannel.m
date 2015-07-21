@@ -291,7 +291,7 @@ static const uint8_t kUserInfoKey;
 #pragma mark - Listening and serving
 
 
-- (void)listenOnPort:(in_port_t)port IPv4Address:(in_addr_t)address callback:(void(^)(NSError *error))callback {
+- (void)listenOnPort:(uint32_t)port IPv4Address:(NSString*)address callback:(void(^)(NSError *error))callback {
   if (connState_ != kConnStateNone) {
     if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
     return;
@@ -314,7 +314,14 @@ static const uint8_t kUserInfoKey;
   addr.sin_port = htons(port);
   //addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
   //addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  addr.sin_addr.s_addr = htonl(address);
+  struct in_addr sin_addr;
+  if (inet_aton(address.UTF8String, &sin_addr) != 1) {
+    close(fd);
+    if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil]);
+    return;
+  }
+
+  addr.sin_addr = sin_addr;
   
   socklen_t socklen = sizeof(addr);
   
