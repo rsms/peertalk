@@ -560,6 +560,7 @@
 		6A64AADC152604D40065BF86 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Peertalk Example/Peertalk Example-Prefix.pch";
 				INFOPLIST_FILE = "Peertalk Example/Peertalk Example-Info.plist";
@@ -572,6 +573,7 @@
 		6A64AADD152604D40065BF86 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = "Peertalk Example/Peertalk Example-Prefix.pch";
 				INFOPLIST_FILE = "Peertalk Example/Peertalk Example-Info.plist";
@@ -693,6 +695,7 @@
 		6A88FA57150D613800FC3647 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = peertalk/prefix.pch;
 				MACOSX_DEPLOYMENT_TARGET = "";
@@ -703,6 +706,7 @@
 		6A88FA58150D613800FC3647 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
+				COMBINE_HIDPI_IMAGES = YES;
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = peertalk/prefix.pch;
 				MACOSX_DEPLOYMENT_TARGET = "";
@@ -714,6 +718,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
@@ -731,6 +736,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				COMBINE_HIDPI_IMAGES = YES;
 				FRAMEWORK_SEARCH_PATHS = (
 					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
 					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
