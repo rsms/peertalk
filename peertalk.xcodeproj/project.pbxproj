@@ -33,7 +33,6 @@
 		6A64AB0815260E5C0065BF86 /* PTChannel.m in Sources */ = {isa = PBXBuildFile; fileRef = 6ACFD2D5151D36220081ACF5 /* PTChannel.m */; };
 		6A64AB0915260E600065BF86 /* PTProtocol.m in Sources */ = {isa = PBXBuildFile; fileRef = 6A88FA5D150D61DE00FC3647 /* PTProtocol.m */; };
 		6A88FA34150D613800FC3647 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A88FA33150D613800FC3647 /* Cocoa.framework */; };
-		6A88FA46150D613800FC3647 /* SenTestingKit.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A88FA45150D613800FC3647 /* SenTestingKit.framework */; };
 		6A88FA47150D613800FC3647 /* Cocoa.framework in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A88FA33150D613800FC3647 /* Cocoa.framework */; };
 		6A88FA4A150D613800FC3647 /* libpeertalk.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 6A88FA30150D613800FC3647 /* libpeertalk.a */; };
 		6A88FA50150D613800FC3647 /* InfoPlist.strings in Resources */ = {isa = PBXBuildFile; fileRef = 6A88FA4E150D613800FC3647 /* InfoPlist.strings */; };
@@ -101,7 +100,7 @@
 		6A88FA36150D613800FC3647 /* AppKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = AppKit.framework; path = System/Library/Frameworks/AppKit.framework; sourceTree = SDKROOT; };
 		6A88FA37150D613800FC3647 /* CoreData.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreData.framework; path = System/Library/Frameworks/CoreData.framework; sourceTree = SDKROOT; };
 		6A88FA38150D613800FC3647 /* Foundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = Foundation.framework; path = System/Library/Frameworks/Foundation.framework; sourceTree = SDKROOT; };
-		6A88FA44150D613800FC3647 /* peertalkTests.octest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = peertalkTests.octest; sourceTree = BUILT_PRODUCTS_DIR; };
+		6A88FA44150D613800FC3647 /* peertalkTests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = peertalkTests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		6A88FA45150D613800FC3647 /* SenTestingKit.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = SenTestingKit.framework; path = Library/Frameworks/SenTestingKit.framework; sourceTree = DEVELOPER_DIR; };
 		6A88FA4D150D613800FC3647 /* peertalkTests-Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = "peertalkTests-Info.plist"; sourceTree = "<group>"; };
 		6A88FA4F150D613800FC3647 /* en */ = {isa = PBXFileReference; lastKnownFileType = text.plist.strings; name = en; path = en.lproj/InfoPlist.strings; sourceTree = "<group>"; };
@@ -148,7 +147,6 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				6A88FA46150D613800FC3647 /* SenTestingKit.framework in Frameworks */,
 				6A88FA47150D613800FC3647 /* Cocoa.framework in Frameworks */,
 				6A88FA4A150D613800FC3647 /* libpeertalk.a in Frameworks */,
 			);
@@ -227,7 +225,7 @@
 			isa = PBXGroup;
 			children = (
 				6A88FA30150D613800FC3647 /* libpeertalk.a */,
-				6A88FA44150D613800FC3647 /* peertalkTests.octest */,
+				6A88FA44150D613800FC3647 /* peertalkTests.xctest */,
 				6A64AAC6152604D40065BF86 /* Peertalk Example.app */,
 				6A64AAE21526050D0065BF86 /* Peertalk iOS Example.app */,
 			);
@@ -369,7 +367,6 @@
 				6A88FA3F150D613800FC3647 /* Sources */,
 				6A88FA40150D613800FC3647 /* Frameworks */,
 				6A88FA41150D613800FC3647 /* Resources */,
-				6A88FA42150D613800FC3647 /* ShellScript */,
 			);
 			buildRules = (
 			);
@@ -378,8 +375,8 @@
 			);
 			name = peertalkTests;
 			productName = rusbhubTests;
-			productReference = 6A88FA44150D613800FC3647 /* peertalkTests.octest */;
-			productType = "com.apple.product-type.bundle";
+			productReference = 6A88FA44150D613800FC3647 /* peertalkTests.xctest */;
+			productType = "com.apple.product-type.bundle.unit-test";
 		};
 /* End PBXNativeTarget section */
 
@@ -444,22 +441,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXShellScriptBuildPhase section */
-		6A88FA42150D613800FC3647 /* ShellScript */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputPaths = (
-			);
-			outputPaths = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "# Run the unit tests in this test bundle.\n\"${SYSTEM_DEVELOPER_DIR}/Tools/RunUnitTests\"\n";
-		};
-/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		6A64AAC2152604D40065BF86 /* Sources */ = {
@@ -732,26 +713,34 @@
 		6A88FA5A150D613800FC3647 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
+				CLANG_ENABLE_MODULES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = peertalk/prefix.pch;
 				INFOPLIST_FILE = "peertalk-tests/peertalkTests-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = "";
 				PRODUCT_NAME = peertalkTests;
-				WRAPPER_EXTENSION = octest;
+				WRAPPER_EXTENSION = xctest;
 			};
 			name = Debug;
 		};
 		6A88FA5B150D613800FC3647 /* Release */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
-				FRAMEWORK_SEARCH_PATHS = "$(DEVELOPER_LIBRARY_DIR)/Frameworks";
+				CLANG_ENABLE_MODULES = YES;
+				FRAMEWORK_SEARCH_PATHS = (
+					"$(DEVELOPER_LIBRARY_DIR)/Frameworks",
+					"$(PLATFORM_DIR)/Developer/Library/Frameworks",
+				);
 				GCC_PRECOMPILE_PREFIX_HEADER = YES;
 				GCC_PREFIX_HEADER = peertalk/prefix.pch;
 				INFOPLIST_FILE = "peertalk-tests/peertalkTests-Info.plist";
 				MACOSX_DEPLOYMENT_TARGET = "";
 				PRODUCT_NAME = peertalkTests;
-				WRAPPER_EXTENSION = octest;
+				WRAPPER_EXTENSION = xctest;
 			};
 			name = Release;
 		};
