@@ -298,10 +298,10 @@ static const uint8_t kUserInfoKey;
     if (callback) callback([NSError errorWithDomain:@"PTError"
                                                code:1
                                            userInfo:@{
-                            NSLocalizedDescriptionKey: NSLocalizedString(@"Invalid IPv4 Address", nil),
-                     NSLocalizedFailureReasonErrorKey: NSLocalizedString(address, nil),
-                NSLocalizedRecoverySuggestionErrorKey: NSLocalizedString(@"Use a valid IPv4 Address", nil)
-                            }]);
+                                                      NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Invalid IPv4 Address: \"%@\"", address],
+                                                      NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Invalid IPv4 Address: \"%@\"", address],
+                                                      NSLocalizedRecoverySuggestionErrorKey: @"Use a valid IPv4 Address",
+                                                      }]);
     return;
   }
 
