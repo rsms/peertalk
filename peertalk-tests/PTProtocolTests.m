@@ -41,12 +41,16 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
 
 - (void)tearDown {
   dispatch_io_close(channel_[0], DISPATCH_IO_STOP);
+#if PT_DISPATCH_RETAIN_RELEASE
   dispatch_release(channel_[0]);
   dispatch_release(queue_[0]);
+#endif
   
   dispatch_io_close(channel_[1], DISPATCH_IO_STOP);
+#if PT_DISPATCH_RETAIN_RELEASE
   dispatch_release(channel_[1]);
   dispatch_release(queue_[1]);
+#endif
   
   protocol_[0] = nil;
   protocol_[1] = nil;
@@ -74,11 +78,11 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
     if (data) {
       if (!allData) {
         allData = data;
+#if PT_DISPATCH_RETAIN_RELEASE
         dispatch_retain(allData);
+#endif
       } else {
-        dispatch_data_t allDataPrev = allData;
         allData = dispatch_data_create_concat(allData, data);
-        dispatch_release(allDataPrev);
       }
     }
     
@@ -91,7 +95,9 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
       dispatch_data_t contiguousData = dispatch_data_create_map(allData, (const void **)&buffer, &bufferSize);
       PTAssertNotNULL(contiguousData);
       callback(contiguousData, buffer, bufferSize);
+#if PT_DISPATCH_RETAIN_RELEASE
       dispatch_release(contiguousData);
+#endif
     }
   });
 }
