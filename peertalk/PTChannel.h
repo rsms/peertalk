@@ -51,7 +51,7 @@
 // Connect to a TCP port on a device connected over USB
 - (void)connectToPort:(uint16_t)port overUSBHub:(PTUSBHub*)usbHub deviceID:(NSNumber*)deviceID callback:(void(^)(NSError *error))callback;
 
-// Connect to a TCP port at IPv4 address. INADDR_LOOPBACK can be used as address
+// Connect to a TCP port at IPv4 address. "127.0.0.1" can be used as address
 // to connect to the local host.
 - (void)connectToPort:(uint16_t)port IPv4Address:(NSString*)address callback:(void(^)(NSError *error, PTAddress *address))callback;
 
