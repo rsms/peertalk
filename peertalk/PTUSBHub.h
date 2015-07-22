@@ -59,7 +59,7 @@ typedef enum {
 // callback.
 //
 - (void)connectToDevice:(NSNumber*)deviceID
-                   port:(int)port
+                   port:(uint32_t)port
                 onStart:(void(^)(NSError *error, dispatch_io_t channel))onStart
                   onEnd:(void(^)(NSError *error))onEnd;
 

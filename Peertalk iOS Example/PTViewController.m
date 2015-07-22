@@ -25,7 +25,7 @@
   
   // Create a new channel that is listening on our IPv4 port
   PTChannel *channel = [PTChannel channelWithDelegate:self];
-  [channel listenOnPort:PTExampleProtocolIPv4PortNumber IPv4Address:INADDR_LOOPBACK callback:^(NSError *error) {
+  [channel listenOnPort:PTExampleProtocolIPv4PortNumber IPv4Address:@"127.0.0.1" callback:^(NSError *error) {
     if (error) {
       [self appendOutputMessage:[NSString stringWithFormat:@"Failed to listen on 127.0.0.1:%d: %@", PTExampleProtocolIPv4PortNumber, error]];
     } else {
