@@ -82,7 +82,13 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
         dispatch_retain(allData);
 #endif
       } else {
+#if PT_DISPATCH_RETAIN_RELEASE
+        dispatch_data_t allDataPrev = allData;
+#endif
         allData = dispatch_data_create_concat(allData, data);
+#if PT_DISPATCH_RETAIN_RELEASE
+        dispatch_release(allDataPrev);
+#endif
       }
     }
     
