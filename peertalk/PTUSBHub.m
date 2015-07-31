@@ -465,7 +465,8 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 - (void)scheduleReadPacketWithCallback:(void(^)(NSError*, NSDictionary*, uint32_t))callback {
   static usbmux_packet_t ref_upacket;
   isReadingPackets_ = YES;
-  
+
+  // Read the first 4 bytes off the channel_
   dispatch_io_read(channel_, 0, sizeof(ref_upacket.size), queue_, ^(bool done, dispatch_data_t data, int error) {
     //NSLog(@"dispatch_io_read 0,4: done=%d data=%p error=%d", done, data, error);
     
@@ -484,6 +485,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
     size_t buffer_size = 0;
     PT_PRECISE_LIFETIME_UNUSED dispatch_data_t map_data = dispatch_data_create_map(data, (const void **)&buffer, &buffer_size); // objc_precise_lifetime guarantees 'map_data' isn't released before memcpy has a chance to do its thing
     assert(buffer_size == sizeof(ref_upacket.size));
+    // Copy the 4 bytes into a uint32_t value
     memcpy((void *)&(upacket_len), (const void *)buffer, buffer_size);
 #if PT_DISPATCH_RETAIN_RELEASE
     dispatch_release(map_data);
