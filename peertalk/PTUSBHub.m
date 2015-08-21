@@ -276,7 +276,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
               bundleVersion, @"ClientVersionString",
               nil];
   } else {
-    packet = [NSDictionary dictionaryWithObjectsAndKeys:@"Listen", @"MessageType", nil];
+    packet = [NSDictionary dictionaryWithObjectsAndKeys:messageType, @"MessageType", nil];
   }
   
   if (payload) {
