@@ -51,14 +51,16 @@
 // Connect to a TCP port on a device connected over USB
 - (void)connectToPort:(int)port overUSBHub:(PTUSBHub*)usbHub deviceID:(NSNumber*)deviceID callback:(void(^)(NSError *error))callback;
 
-// Connect to a TCP port at IPv4 address. "127.0.0.1" can be used as address
+// Connect to a TCP port at IPv4 address. Provided port must NOT be in network
+// byte order. "127.0.0.1" can be used as address
 // to connect to the local host.
-- (void)connectToPort:(uint16_t)port IPv4Address:(NSString*)address callback:(void(^)(NSError *error, PTAddress *address))callback;
+- (void)connectToPort:(in_port_t)port IPv4Address:(NSString*)address callback:(void(^)(NSError *error, PTAddress *address))callback;
 
 // Listen for connections on port and address, effectively starting a socket
-// server. For this to make sense, you should provide a onAccept block handler
+// server. Provided port must NOT be in network byte order.
+// For this to make sense, you should provide a onAccept block handler
 // or a delegate implementing ioFrameChannel:didAcceptConnection:.
-- (void)listenOnPort:(uint16_t)port IPv4Address:(NSString*)address callback:(void(^)(NSError *error))callback;
+- (void)listenOnPort:(in_port_t)port IPv4Address:(NSString*)address callback:(void(^)(NSError *error))callback;
 
 // Send a frame with an optional payload and optional callback.
 // If *callback* is not NULL, the block is invoked when either an error occured
