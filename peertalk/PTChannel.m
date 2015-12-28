@@ -190,7 +190,7 @@ static const uint8_t kUserInfoKey;
 #pragma mark - Connecting
 
 
-- (void)connectToPort:(uint16_t)port overUSBHub:(PTUSBHub*)usbHub deviceID:(NSNumber*)deviceID callback:(void(^)(NSError *error))callback {
+- (void)connectToPort:(int)port overUSBHub:(PTUSBHub*)usbHub deviceID:(NSNumber*)deviceID callback:(void(^)(NSError *error))callback {
   assert(protocol_ != NULL);
   if (connState_ != kConnStateNone) {
     if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
@@ -214,20 +214,7 @@ static const uint8_t kUserInfoKey;
 }
 
 
-- (void)connectToPort:(uint16_t)port IPv4Address:(NSString*)address callback:(void(^)(NSError *error, PTAddress *address))callback {
-  // Validate IPv4Address
-  struct in_addr sin_addr;
-  if (inet_aton(address.UTF8String, &sin_addr) != 1) {
-    if (callback) callback([NSError errorWithDomain:@"PTError"
-                                               code:1
-                                           userInfo:@{
-                                                      NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Invalid IPv4 Address: \"%@\"", address],
-                                                      NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Invalid IPv4 Address: \"%@\"", address],
-                                                      NSLocalizedRecoverySuggestionErrorKey: @"Use a valid IPv4 Address",
-                                                      }], nil);
-    return;
-  }
-
+- (void)connectToPort:(in_port_t)port IPv4Address:(in_addr_t)address callback:(void(^)(NSError *error, PTAddress *address))callback {
   assert(protocol_ != NULL);
   if (connState_ != kConnStateNone) {
     if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil], nil);
@@ -255,7 +242,7 @@ static const uint8_t kUserInfoKey;
   addr.sin_port = htons(port);
   //addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
   //addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  addr.sin_addr = sin_addr;
+  addr.sin_addr.s_addr = htonl(address);
   
   // prevent SIGPIPE
 	int on = 1;
@@ -304,25 +291,7 @@ static const uint8_t kUserInfoKey;
 #pragma mark - Listening and serving
 
 
-- (void)listenOnPort:(uint16_t)port IPv4Address:(NSString*)address callback:(void(^)(NSError *error))callback {
-  // Validate IPv4Address
-  struct in_addr sin_addr;
-  if (inet_aton(address.UTF8String, &sin_addr) != 1) {
-    if (callback) callback([NSError errorWithDomain:@"PTError"
-                                               code:1
-                                           userInfo:@{
-                                                      NSLocalizedDescriptionKey: [NSString stringWithFormat:@"Invalid IPv4 Address: \"%@\"", address],
-                                                      NSLocalizedFailureReasonErrorKey: [NSString stringWithFormat:@"Invalid IPv4 Address: \"%@\"", address],
-                                                      NSLocalizedRecoverySuggestionErrorKey: @"Use a valid IPv4 Address",
-                                                      }]);
-    return;
-  }
-
-  if (connState_ != kConnStateNone) {
-    if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
-    return;
-  }
-  
+- (void)listenOnPort:(in_port_t)port IPv4Address:(in_addr_t)address callback:(void(^)(NSError *error))callback {
   assert(dispatchObj_source_ == nil);
   
   // Create socket
@@ -340,7 +309,7 @@ static const uint8_t kUserInfoKey;
   addr.sin_port = htons(port);
   //addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
   //addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  addr.sin_addr = sin_addr;
+  addr.sin_addr.s_addr = htonl(address);
   
   socklen_t socklen = sizeof(addr);
   

@@ -211,7 +211,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 }
 
 
-- (void)connectToDevice:(NSNumber*)deviceID port:(uint32_t)port onStart:(void(^)(NSError*, dispatch_io_t))onStart onEnd:(void(^)(NSError*))onEnd {
+- (void)connectToDevice:(NSNumber*)deviceID port:(int)port onStart:(void(^)(NSError*, dispatch_io_t))onStart onEnd:(void(^)(NSError*))onEnd {
   PTUSBChannel *channel = [PTUSBChannel new];
   NSError *error = nil;
   
