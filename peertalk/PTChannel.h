@@ -52,15 +52,18 @@
 - (void)connectToPort:(int)port overUSBHub:(PTUSBHub*)usbHub deviceID:(NSNumber*)deviceID callback:(void(^)(NSError *error))callback;
 
 // Connect to a TCP port at IPv4 address. Provided port must NOT be in network
-// byte order. "127.0.0.1" can be used as address
-// to connect to the local host.
-- (void)connectToPort:(in_port_t)port IPv4Address:(NSString*)address callback:(void(^)(NSError *error, PTAddress *address))callback;
+// byte order. Provided in_addr_t must NOT be in network byte order. A value returned
+// from inet_aton() will be in network byte order. You can use a value of inet_aton()
+// as the address parameter here, but you must flip the byte order before passing the
+// in_addr_t to this function.
+- (void)connectToPort:(in_port_t)port IPv4Address:(in_addr_t)address callback:(void(^)(NSError *error, PTAddress *address))callback;
 
 // Listen for connections on port and address, effectively starting a socket
-// server. Provided port must NOT be in network byte order.
+// server. Provided port must NOT be in network byte order. Provided in_addr_t
+// must NOT be in network byte order.
 // For this to make sense, you should provide a onAccept block handler
 // or a delegate implementing ioFrameChannel:didAcceptConnection:.
-- (void)listenOnPort:(in_port_t)port IPv4Address:(NSString*)address callback:(void(^)(NSError *error))callback;
+- (void)listenOnPort:(in_port_t)port IPv4Address:(in_addr_t)address callback:(void(^)(NSError *error))callback;
 
 // Send a frame with an optional payload and optional callback.
 // If *callback* is not NULL, the block is invoked when either an error occured

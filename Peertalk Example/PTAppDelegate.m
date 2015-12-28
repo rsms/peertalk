@@ -287,7 +287,7 @@
 - (void)connectToLocalIPv4Port {
   PTChannel *channel = [PTChannel channelWithDelegate:self];
   channel.userInfo = [NSString stringWithFormat:@"127.0.0.1:%d", PTExampleProtocolIPv4PortNumber];
-  [channel connectToPort:PTExampleProtocolIPv4PortNumber IPv4Address:@"127.0.0.1" callback:^(NSError *error, PTAddress *address) {
+  [channel connectToPort:PTExampleProtocolIPv4PortNumber IPv4Address:INADDR_LOOPBACK callback:^(NSError *error, PTAddress *address) {
     if (error) {
       if (error.domain == NSPOSIXErrorDomain && (error.code == ECONNREFUSED || error.code == ETIMEDOUT)) {
         // this is an expected state
