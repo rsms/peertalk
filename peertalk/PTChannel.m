@@ -190,7 +190,7 @@ static const uint8_t kUserInfoKey;
 #pragma mark - Connecting
 
 
-- (void)connectToPort:(uint16_t)port overUSBHub:(PTUSBHub*)usbHub deviceID:(NSNumber*)deviceID callback:(void(^)(NSError *error))callback {
+- (void)connectToPort:(int)port overUSBHub:(PTUSBHub*)usbHub deviceID:(NSNumber*)deviceID callback:(void(^)(NSError *error))callback {
   assert(protocol_ != NULL);
   if (connState_ != kConnStateNone) {
     if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
