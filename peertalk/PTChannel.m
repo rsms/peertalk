@@ -214,7 +214,7 @@ static const uint8_t kUserInfoKey;
 }
 
 
-- (void)connectToPort:(in_port_t)port IPv4Address:(in_addr_t)ipv4Address callback:(void(^)(NSError *error, PTAddress *address))callback {
+- (void)connectToPort:(in_port_t)port IPv4Address:(in_addr_t)address callback:(void(^)(NSError *error, PTAddress *address))callback {
   assert(protocol_ != NULL);
   if (connState_ != kConnStateNone) {
     if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil], nil);
@@ -242,7 +242,7 @@ static const uint8_t kUserInfoKey;
   addr.sin_port = htons(port);
   //addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
   //addr.sin_addr.s_addr = htonl(INADDR_ANY);
-  addr.sin_addr.s_addr = htonl(ipv4Address);
+  addr.sin_addr.s_addr = htonl(address);
   
   // prevent SIGPIPE
 	int on = 1;
@@ -282,9 +282,9 @@ static const uint8_t kUserInfoKey;
   
   // Success
   NSError *err = nil;
-  PTAddress *address = [[PTAddress alloc] initWithSockaddr:(struct sockaddr_storage*)&addr];
+  PTAddress *ptAddr = [[PTAddress alloc] initWithSockaddr:(struct sockaddr_storage*)&addr];
   [self startReadingFromConnectedChannel:dispatchChannel error:&err];
-  if (callback) callback(err, address);
+  if (callback) callback(err, ptAddr);
 }
 
 
@@ -292,11 +292,6 @@ static const uint8_t kUserInfoKey;
 
 
 - (void)listenOnPort:(in_port_t)port IPv4Address:(in_addr_t)address callback:(void(^)(NSError *error))callback {
-  if (connState_ != kConnStateNone) {
-    if (callback) callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
-    return;
-  }
-  
   assert(dispatchObj_source_ == nil);
   
   // Create socket

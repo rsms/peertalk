@@ -6,7 +6,7 @@
 #include <sys/un.h>
 #include <err.h>
 
-#define PTAssertNotNULL(x) do { if ((x) == NULL) STFail(@"%s == NULL", #x); } while(0)
+#define PTAssertNotNULL(x) do { if ((x) == NULL) XCTFail(@"%s == NULL", #x); } while(0)
 
 static const uint32_t PTFrameTypeTestPing = UINT32_MAX - 1;
 static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
@@ -18,7 +18,7 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
   // Set-up code here.
   
   if (socketpair(AF_UNIX, SOCK_STREAM, 0, socket_) == -1) {
-    STFail(@"socketpair");
+    XCTFail(@"socketpair");
   }
   
   queue_[0] = dispatch_queue_create("PTProtocolTests.queue_[0]", DISPATCH_QUEUE_SERIAL);
@@ -41,12 +41,16 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
 
 - (void)tearDown {
   dispatch_io_close(channel_[0], DISPATCH_IO_STOP);
+#if PT_DISPATCH_RETAIN_RELEASE
   dispatch_release(channel_[0]);
   dispatch_release(queue_[0]);
+#endif
   
   dispatch_io_close(channel_[1], DISPATCH_IO_STOP);
+#if PT_DISPATCH_RETAIN_RELEASE
   dispatch_release(channel_[1]);
   dispatch_release(queue_[1]);
+#endif
   
   protocol_[0] = nil;
   protocol_[1] = nil;
@@ -60,7 +64,7 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
 - (void)write:(dispatch_data_t)data callback:(void(^)())callback {
   dispatch_io_write(channel_[0], 0, data, queue_[0], ^(bool done, dispatch_data_t data, int error) {
     if (done) {
-      STAssertEquals(error, (int)0, @"Expected error == 0");
+      XCTAssertEqual(error, (int)0, @"Expected error == 0");
       callback();
     }
   });
@@ -74,16 +78,22 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
     if (data) {
       if (!allData) {
         allData = data;
+#if PT_DISPATCH_RETAIN_RELEASE
         dispatch_retain(allData);
+#endif
       } else {
+#if PT_DISPATCH_RETAIN_RELEASE
         dispatch_data_t allDataPrev = allData;
+#endif
         allData = dispatch_data_create_concat(allData, data);
+#if PT_DISPATCH_RETAIN_RELEASE
         dispatch_release(allDataPrev);
+#endif
       }
     }
     
     if (done) {
-      STAssertEquals(error, (int)0, @"Expected error == 0");
+      XCTAssertEqual(error, (int)0, @"Expected error == 0");
       PTAssertNotNULL(allData);
       
       uint8_t *buffer = NULL;
@@ -91,7 +101,9 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
       dispatch_data_t contiguousData = dispatch_data_create_map(allData, (const void **)&buffer, &bufferSize);
       PTAssertNotNULL(contiguousData);
       callback(contiguousData, buffer, bufferSize);
+#if PT_DISPATCH_RETAIN_RELEASE
       dispatch_release(contiguousData);
+#endif
     }
   });
 }
@@ -99,7 +111,7 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
 
 - (void)waitForSemaphore:(dispatch_semaphore_t)sem milliseconds:(uint64_t)ms {
   if (dispatch_semaphore_wait(sem, dispatch_time(DISPATCH_TIME_NOW, ms * 1000000LL)) != 0L) {
-    STFail(@"Timeout in dispatch_semaphore_wait");
+    XCTFail(@"Timeout in dispatch_semaphore_wait");
   }
 }
 
@@ -110,16 +122,16 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
         expectedPayloadSize:(uint32_t)expectedPayloadSize
                    callback:(void(^)(dispatch_data_t contiguousData, const uint8_t *buffer, size_t bufferSize))callback {
   [protocol_[clientIndex] readFrameOverChannel:channel_[clientIndex] callback:^(NSError *error, uint32_t receivedFrameType, uint32_t receivedFrameTag, uint32_t receivedPayloadSize) {
-    if (error) STFail(@"readFrameOverChannel failed: %@", error);
-    STAssertEquals(receivedFrameType, expectedFrameType, nil);
-    STAssertEquals(receivedFrameTag, expectedFrameTag, nil);
-    STAssertEquals(receivedPayloadSize, expectedPayloadSize, nil);
+    if (error) XCTFail(@"readFrameOverChannel failed: %@", error);
+    XCTAssertEqual(receivedFrameType, expectedFrameType);
+    XCTAssertEqual(receivedFrameTag, expectedFrameTag);
+    XCTAssertEqual(receivedPayloadSize, expectedPayloadSize);
     
     if (expectedPayloadSize != 0) {
       [protocol_[clientIndex] readPayloadOfSize:receivedPayloadSize overChannel:channel_[clientIndex] callback:^(NSError *error, dispatch_data_t contiguousData, const uint8_t *buffer, size_t bufferSize) {
         PTAssertNotNULL(contiguousData);
         PTAssertNotNULL(buffer);
-        STAssertEquals((uint32_t)bufferSize, receivedPayloadSize, nil);
+        XCTAssertEqual((uint32_t)bufferSize, receivedPayloadSize);
         callback(contiguousData, buffer, bufferSize);
       }];
     } else {
@@ -149,7 +161,7 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
   // Read
   [self readFromOffset:0 length:testMessageSize callback:^(dispatch_data_t contiguousData, const uint8_t *data, size_t size) {
     if (memcmp((const void *)testMessage, (const void *)data, size) != 0) {
-      STFail(@"Received data differs from sent data");
+      XCTFail(@"Received data differs from sent data");
     }
     dispatch_semaphore_signal(sem1);
   }];
@@ -165,14 +177,14 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
   uint32_t payloadSize = 0;
 
   [protocol_[0] sendFrameOfType:PTFrameTypeTestPing tag:frameTag withPayload:nil overChannel:channel_[0] callback:^(NSError *error) {
-    if (error) STFail(@"sendFrameOfType failed: %@", error);
+    if (error) XCTFail(@"sendFrameOfType failed: %@", error);
   }];
 
   [protocol_[1] readFrameOverChannel:channel_[1] callback:^(NSError *error, uint32_t receivedFrameType, uint32_t receivedFrameTag, uint32_t receivedPayloadSize) {
-    if (error) STFail(@"readFrameOverChannel failed: %@", error);
-    STAssertEquals(receivedFrameType, PTFrameTypeTestPing, nil);
-    STAssertEquals(receivedFrameTag, frameTag, nil);
-    STAssertEquals(receivedPayloadSize, payloadSize, nil);
+    if (error) XCTFail(@"readFrameOverChannel failed: %@", error);
+    XCTAssertEqual(receivedFrameType, PTFrameTypeTestPing);
+    XCTAssertEqual(receivedFrameTag, frameTag);
+    XCTAssertEqual(receivedPayloadSize, payloadSize);
     
     dispatch_semaphore_signal(sem1);
   }];
@@ -189,28 +201,28 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
   
   // Send frame on channel 0
   [protocol_[0] sendFrameOfType:PTFrameTypeTestPing tag:frameTag withPayload:nil overChannel:channel_[0] callback:^(NSError *error) {
-    if (error) STFail(@"sendFrameOfType failed: %@", error);
+    if (error) XCTFail(@"sendFrameOfType failed: %@", error);
   }];
   
   // Read frame on channel 1
   [protocol_[1] readFrameOverChannel:channel_[1] callback:^(NSError *error, uint32_t receivedFrameType, uint32_t receivedFrameTag, uint32_t receivedPayloadSize) {
-    if (error) STFail(@"readFrameOverChannel failed: %@", error);
-    STAssertEquals(receivedFrameType, PTFrameTypeTestPing, nil);
-    STAssertEquals(receivedFrameTag, frameTag, nil);
-    STAssertEquals(receivedPayloadSize, payloadSize, nil);
+    if (error) XCTFail(@"readFrameOverChannel failed: %@", error);
+    XCTAssertEqual(receivedFrameType, PTFrameTypeTestPing);
+    XCTAssertEqual(receivedFrameTag, frameTag);
+    XCTAssertEqual(receivedPayloadSize, payloadSize);
     
     // Reply on channel 1
     [protocol_[1] sendFrameOfType:PTFrameTypeTestPingReply tag:receivedFrameTag withPayload:nil overChannel:channel_[1] callback:^(NSError *error) {
-      if (error) STFail(@"sendFrameOfType failed: %@", error);
+      if (error) XCTFail(@"sendFrameOfType failed: %@", error);
     }];
   }];
   
   // Read reply on channel 0 (we expect a reply)
   [protocol_[0] readFrameOverChannel:channel_[0] callback:^(NSError *error, uint32_t receivedFrameType, uint32_t receivedFrameTag, uint32_t receivedPayloadSize) {
-    if (error) STFail(@"readFrameOverChannel failed: %@", error);
-    STAssertEquals(receivedFrameType, PTFrameTypeTestPingReply, nil);
-    STAssertEquals(receivedFrameTag, frameTag, nil);
-    STAssertEquals(receivedPayloadSize, payloadSize, nil);
+    if (error) XCTFail(@"readFrameOverChannel failed: %@", error);
+    XCTAssertEqual(receivedFrameType, PTFrameTypeTestPingReply);
+    XCTAssertEqual(receivedFrameTag, frameTag);
+    XCTAssertEqual(receivedPayloadSize, payloadSize);
     // Test case complete
     dispatch_semaphore_signal(sem1);
   }];
@@ -227,18 +239,18 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
   dispatch_data_t payload = [payloadData createReferencingDispatchData];
   
   [protocol_[0] sendFrameOfType:PTFrameTypeTestPing tag:PTFrameNoTag withPayload:payload overChannel:channel_[0] callback:^(NSError *error) {
-    if (error) STFail(@"sendFrameOfType failed: %@", error);
+    if (error) XCTFail(@"sendFrameOfType failed: %@", error);
   }];
   
   [self readFrameWithClient:1 expectedFrameType:PTFrameTypeTestPing expectedFrameTag:PTFrameNoTag expectedPayloadSize:(uint32_t)dispatch_data_get_size(payload) callback:^(dispatch_data_t contiguousData, const uint8_t *buffer, size_t bufferSize) {
     
     if (memcmp((const void *)payloadData.bytes, (const void *)buffer, bufferSize) != 0) {
-      STFail(@"Received payload differs from sent payload");
+      XCTFail(@"Received payload differs from sent payload");
     }
     
     NSString *receivedTextMessage = [[NSString alloc] initWithBytes:buffer length:bufferSize encoding:NSUTF8StringEncoding];
     if (![textMessage isEqualToString:receivedTextMessage]) {
-      STFail(@"Received payload interpreted as UTF-8 text differs from sent text");
+      XCTFail(@"Received payload interpreted as UTF-8 text differs from sent text");
     }
     //else NSLog(@"Received payload as UTF-8 string: \"%@\"", receivedTextMessage);
     
@@ -260,7 +272,7 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
     frameTypes[i] = PTFrameTypeTestPing - i; // note: PTFrameTypeTest* are adjusted to UINT32_MAX, thus we subtract to avoid overflow
     tags[i] = [protocol_[0] newTag];
     [protocol_[0] sendFrameOfType:frameTypes[i] tag:tags[i] withPayload:nil overChannel:channel_[0] callback:^(NSError *error) {
-      if (error) STFail(@"sendFrameOfType failed: %@", error);
+      if (error) XCTFail(@"sendFrameOfType failed: %@", error);
     }];
   }
   
@@ -306,14 +318,14 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
     }
     
     [protocol_[0] sendFrameOfType:frameType tag:tag withPayload:payload overChannel:channel_[0] callback:^(NSError *error) {
-      if (error) STFail(@"sendFrameOfType failed: %@", error);
+      if (error) XCTFail(@"sendFrameOfType failed: %@", error);
     }];
   }
   
   // Read all frames on channel 1
   __block int read_i = 0;
   [protocol_[1] readFramesOverChannel:channel_[1] onFrame:^(NSError *error, uint32_t type, uint32_t tag, uint32_t payloadSize, dispatch_block_t resumeReadingFrames) {
-    if (error) STFail(@"readFramesOverChannel failed: %@", error);
+    if (error) XCTFail(@"readFramesOverChannel failed: %@", error);
     
     uint32_t expectedType = [[frameTypes objectAtIndex:read_i] unsignedIntValue];
     uint32_t expectedTag = [[tags objectAtIndex:read_i] unsignedIntValue];
@@ -321,9 +333,9 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
     if (expectedPayloadData == (id)[NSNull null])
       expectedPayloadData = nil;
 
-    STAssertEquals(type, expectedType, nil);
-    STAssertEquals(tag, expectedTag, nil);
-    STAssertEquals(payloadSize, (uint32_t)(expectedPayloadData ? expectedPayloadData.length : 0), nil);
+    XCTAssertEqual(type, expectedType);
+    XCTAssertEqual(tag, expectedTag);
+    XCTAssertEqual(payloadSize, (uint32_t)(expectedPayloadData ? expectedPayloadData.length : 0));
     
     dispatch_block_t cont = ^{
       ++read_i;
@@ -338,10 +350,10 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
       [protocol_[1] readPayloadOfSize:payloadSize overChannel:channel_[1] callback:^(NSError *error, dispatch_data_t contiguousData, const uint8_t *buffer, size_t bufferSize) {
         PTAssertNotNULL(contiguousData);
         PTAssertNotNULL(buffer);
-        STAssertEquals((uint32_t)bufferSize, payloadSize, nil);
+        XCTAssertEqual((uint32_t)bufferSize, payloadSize);
         
         if (memcmp((const void *)(expectedPayloadData.bytes), (const void *)buffer, bufferSize) != 0) {
-          STFail(@"Received payload differs from sent payload");
+          XCTFail(@"Received payload differs from sent payload");
         }
         
         //NSLog(@"Received payload as UTF-8 string: \"%@\"", [[NSString alloc] initWithBytes:buffer length:bufferSize encoding:NSUTF8StringEncoding]);
