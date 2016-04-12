@@ -15,7 +15,7 @@
             <BuildableReference
                BuildableIdentifier = "primary"
                BlueprintIdentifier = "EE158A671CBD3ED700A3E3F0"
-               BuildableName = "Peertalk iOS.framework"
+               BuildableName = "Peertalk.framework"
                BlueprintName = "Peertalk iOS"
                ReferencedContainer = "container:peertalk.xcodeproj">
             </BuildableReference>
@@ -43,7 +43,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "EE158A671CBD3ED700A3E3F0"
-            BuildableName = "Peertalk iOS.framework"
+            BuildableName = "Peertalk.framework"
             BlueprintName = "Peertalk iOS"
             ReferencedContainer = "container:peertalk.xcodeproj">
          </BuildableReference>
@@ -65,7 +65,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "EE158A671CBD3ED700A3E3F0"
-            BuildableName = "Peertalk iOS.framework"
+            BuildableName = "Peertalk.framework"
             BlueprintName = "Peertalk iOS"
             ReferencedContainer = "container:peertalk.xcodeproj">
          </BuildableReference>
@@ -83,7 +83,7 @@
          <BuildableReference
             BuildableIdentifier = "primary"
             BlueprintIdentifier = "EE158A671CBD3ED700A3E3F0"
-            BuildableName = "Peertalk iOS.framework"
+            BuildableName = "Peertalk.framework"
             BlueprintName = "Peertalk iOS"
             ReferencedContainer = "container:peertalk.xcodeproj">
          </BuildableReference>
