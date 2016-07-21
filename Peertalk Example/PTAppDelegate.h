@@ -1,3 +1,4 @@
+#import <Cocoa/Cocoa.h>
 #import "PTChannel.h"
 
 static const NSTimeInterval PTAppReconnectDelay = 1.0;

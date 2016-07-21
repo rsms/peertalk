@@ -1,4 +1,5 @@
 #include <dispatch/dispatch.h>
+#import <Foundation/Foundation.h>
 
 // PTUSBDeviceDidAttachNotification
 // Posted when a device has been attached. Also posted for each device that is

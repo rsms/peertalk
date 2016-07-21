@@ -13,6 +13,7 @@
 // - Lightweight API on top of libdispatch (aka GCD) -- close to the metal.
 //
 #include <dispatch/dispatch.h>
+#import <Foundation/Foundation.h>
 
 // Special frame tag that signifies "no tag". Your implementation should never
 // create a reply for a frame with this tag.
