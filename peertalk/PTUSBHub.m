@@ -47,7 +47,7 @@ typedef struct usbmux_packet {
   char data[0];
 } __attribute__((__packed__)) usbmux_packet_t;
 
-static const kUsbmuxPacketMaxPayloadSize = UINT32_MAX - (uint32_t)sizeof(usbmux_packet_t);
+static const uint32_t kUsbmuxPacketMaxPayloadSize = UINT32_MAX - (uint32_t)sizeof(usbmux_packet_t);
 
 
 static uint32_t usbmux_packet_payload_size(usbmux_packet_t *upacket) {
@@ -568,8 +568,20 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 }
 
 
-- (void)sendPacketOfType:(USBMuxPacketType)type overProtocol:(USBMuxPacketProtocol)protocol tag:(uint32_t)tag payload:(NSData*)payload callback:(void(^)(NSError*))callback {
-  usbmux_packet_t *upacket = usbmux_packet_create(protocol, type, tag, payload ? payload.bytes : nil, payload ? payload.length : 0);
+- (void)sendPacketOfType:(USBMuxPacketType)type
+            overProtocol:(USBMuxPacketProtocol)protocol
+                     tag:(uint32_t)tag
+                 payload:(NSData*)payload
+                callback:(void(^)(NSError*))callback
+{
+  assert(payload.length <= kUsbmuxPacketMaxPayloadSize);
+  usbmux_packet_t *upacket = usbmux_packet_create(
+    protocol,
+    type,
+    tag,
+    payload ? payload.bytes : nil,
+    (uint32_t)(payload ? payload.length : 0)
+  );
   dispatch_data_t data = dispatch_data_create((const void*)upacket, upacket->size, queue_, ^{
     // Free packet when data is freed
     usbmux_packet_free(upacket);
