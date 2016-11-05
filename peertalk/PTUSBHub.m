@@ -45,7 +45,9 @@ typedef struct usbmux_packet {
   USBMuxPacketType type;
   uint32_t tag;
   char data[0];
-} usbmux_packet_t;
+} __attribute__((__packed__)) usbmux_packet_t;
+
+static const kUsbmuxPacketMaxPayloadSize = UINT32_MAX - (uint32_t)sizeof(usbmux_packet_t);
 
 
 static uint32_t usbmux_packet_payload_size(usbmux_packet_t *upacket) {
@@ -58,28 +60,34 @@ static void *usbmux_packet_payload(usbmux_packet_t *upacket) {
 }
 
 
-static void usbmux_packet_set_payload(usbmux_packet_t *upacket, const void *payload, uint32_t payloadLength) {
+static void usbmux_packet_set_payload(usbmux_packet_t *upacket,
+                                      const void *payload,
+                                      uint32_t payloadLength)
+{
   memcpy(usbmux_packet_payload(upacket), payload, payloadLength);
 }
 
 
-static usbmux_packet_t *usbmux_packet_alloc(CFIndex payloadSize) {
-  assert(payloadSize <= UINT32_MAX); // protocol limitation
-  uint32_t payloadLength = (uint32_t)payloadSize;
-  uint32_t upacketLength = sizeof(usbmux_packet_t) + payloadLength;
-  assert(sizeof(usbmux_packet_t) == 16);
-  usbmux_packet_t *upacket = CFAllocatorAllocate(kCFAllocatorDefault, upacketLength, 0);
+static usbmux_packet_t *usbmux_packet_alloc(uint32_t payloadSize) {
+  assert(payloadSize <= kUsbmuxPacketMaxPayloadSize);
+  uint32_t upacketSize = sizeof(usbmux_packet_t) + payloadSize;
+  usbmux_packet_t *upacket = CFAllocatorAllocate(kCFAllocatorDefault, upacketSize, 0);
   memset(upacket, 0, sizeof(usbmux_packet_t));
-  upacket->size = upacketLength;
+  upacket->size = upacketSize;
   return upacket;
 }
 
 
-static usbmux_packet_t *usbmux_packet_create(USBMuxPacketProtocol protocol, USBMuxPacketType type, uint32_t tag, const void *payload, NSUInteger payloadSize) {
+static usbmux_packet_t *usbmux_packet_create(USBMuxPacketProtocol protocol,
+                                             USBMuxPacketType type,
+                                             uint32_t tag,
+                                             const void *payload,
+                                             uint32_t payloadSize)
+{
   usbmux_packet_t *upacket = usbmux_packet_alloc(payloadSize);
-  
-  if (!upacket)
+  if (!upacket) {
     return NULL;
+  }
   
   upacket->protocol = protocol;
   upacket->type = type;
@@ -488,9 +496,9 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 #if PT_DISPATCH_RETAIN_RELEASE
     dispatch_release(map_data);
 #endif
-    
+
     // Allocate a new usbmux_packet_t for the expected size
-    uint32_t payloadLength = upacket_len - sizeof(usbmux_packet_t);
+    uint32_t payloadLength = upacket_len - (uint32_t)sizeof(usbmux_packet_t);
     usbmux_packet_t *upacket = usbmux_packet_alloc(payloadLength);
     
     // Read rest of the incoming usbmux_packet_t
@@ -498,13 +506,25 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
     dispatch_io_read(channel_, offset, upacket->size - offset, queue_, ^(bool done, dispatch_data_t data, int error) {
       //NSLog(@"dispatch_io_read X,Y: done=%d data=%p error=%d", done, data, error);
       
-      if (!done)
+      if (!done) {
         return;
+      }
       
       isReadingPackets_ = NO;
       
       if (error) {
         callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil], nil, 0);
+        usbmux_packet_free(upacket);
+        return;
+      }
+
+      if (upacket_len > kUsbmuxPacketMaxPayloadSize) {
+        callback(
+          [[NSError alloc] initWithDomain:PTUSBHubErrorDomain code:1 userInfo:@{
+            NSLocalizedDescriptionKey:@"Received a packet that is too large"}],
+          nil,
+          0
+        );
         usbmux_packet_free(upacket);
         return;
       }
