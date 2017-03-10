@@ -61,6 +61,7 @@ typedef enum {
 //
 - (void)connectToDevice:(NSNumber*)deviceID
                    port:(int)port
+                onQueue:(dispatch_queue_t)queue
                 onStart:(void(^)(NSError *error, dispatch_io_t channel))onStart
                   onEnd:(void(^)(NSError *error))onEnd;
 

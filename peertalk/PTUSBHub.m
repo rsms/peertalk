@@ -219,11 +219,11 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 }
 
 
-- (void)connectToDevice:(NSNumber*)deviceID port:(int)port onStart:(void(^)(NSError*, dispatch_io_t))onStart onEnd:(void(^)(NSError*))onEnd {
+- (void)connectToDevice:(NSNumber*)deviceID port:(int)port onQueue:(dispatch_queue_t)queue onStart:(void(^)(NSError*, dispatch_io_t))onStart onEnd:(void(^)(NSError*))onEnd {
   PTUSBChannel *channel = [PTUSBChannel new];
   NSError *error = nil;
   
-  if (![channel openOnQueue:dispatch_get_main_queue() error:&error onEnd:onEnd]) {
+  if (![channel openOnQueue:queue error:&error onEnd:onEnd]) {
     onStart(error, nil);
     return;
   }
