@@ -32,6 +32,8 @@ PeerTalk is an iOS and Mac Cocoa library for communicating over USB.
 
 4. Tested and designed for libdispatch (aka Grand Central Dispatch).
 
+5. Now compatible with Bonjour® services and NSStream-based programs
+
 Grab the goods from [https://github.com/rsms/peertalk](https://github.com/rsms/peertalk)
 
 
@@ -62,3 +64,71 @@ It _should_ work.
 Demo video: [http://www.youtube.com/watch?v=kQPWy8N0mBg](http://www.youtube.com/watch?v=kQPWy8N0mBg)
 
 <iframe width="880" height="530" src="http://www.youtube.com/embed/kQPWy8N0mBg?hd=1&amp;rel=0" frameborder="0" allowfullscreen></iframe>
+
+## Using peertalk with Bonjour
+
+Peertalk can now be used to connect from a macOS application to a Bonjour service running on a USB-attached iOS device. It only involves a small modification of your existing Bonjour code.
+
+When you want to connect to a Bonjour service, you generally use a `NSNetService` object associated with a class implementing the `NSNetServiceDelegate`protocol. Then you *resolve* the Bonjour service:
+
+````
+// self implements the NSNetServiceDelegate protocol
+NSString *serviceName = ...;
+NSString *serviceType = @"_music._tcp"; // or any custom service type prided by your iOS app
+NSNetService *service;
+ 
+service = [[NSNetService alloc] initWithDomain:@"local." type: serviceType name:serviceName];
+service.delegate = self;
+[service resolveWithTimeout:5.0];
+````
+
+Then you implement the delegate method `netServiceDidResolveAddress`:
+
+````
+- (void)netServiceDidResolveAddress:(NSNetService *)netService
+{
+    // netService has been succesfuly resolved, its hostname and port are now known
+    
+    // First try to connect to the service using a USB link
+    [PTUSBHub.sharedHub connectToDeviceWithHostName: netService.hostName port:(int)netService.port 
+                                            onStart:^(NSError *error, NSInputStream *inStream, NSOutputStream *outStream) {
+        
+        if ((inStream == nil) || (outStream == nil)) {
+            // USB connection did not succeed or was not supported: connect to the resolved service via standard Bonjour mechanism
+            [netService getInputStream:&inStream outputStream:&outStream];
+        }
+        
+        if ((inStream != nil) || (outStream != nil)) {
+            // ... Use the NSStreams for communicating with the service
+        }
+    }];
+    
+}
+````
+
+### In the iOS app providing the Bonjour service
+
+For this mechanism to work, **peertalk** needs a way to know the Bonjour hostname of the USB-connected iOS device providing the Bonjour service.
+
+This is achieved by running a `PTHostNameProvider` in your iOS application, typically in the AppDelegate:
+
+````
+#import "AppDelegate.h"
+#import "PTHostnameProvider.h"
+
+@implementation AppDelegate
+
+- (BOOL)application:(UIApplication *)application didFinishLaunchingWithOptions:(NSDictionary *)launchOptions {
+
+  [PTHostNameProvider start];
+  
+  // Other inits ...
+  return YES;
+}
+
+// ...
+
+@end
+
+````
+
