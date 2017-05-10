@@ -87,7 +87,7 @@ Then you implement the delegate method `netServiceDidResolveAddress`:
 ````
 - (void)netServiceDidResolveAddress:(NSNetService *)netService
 {
-    // netService has been succesfuly resolved, its hostname and port are now known
+    // netService has been succesfuly resolved, its hostname and port are now set
     
     // First try to connect to the service using a USB link
     [PTUSBHub.sharedHub connectToDeviceWithHostName: netService.hostName port:(int)netService.port 
@@ -98,7 +98,7 @@ Then you implement the delegate method `netServiceDidResolveAddress`:
             [netService getInputStream:&inStream outputStream:&outStream];
         }
         
-        if ((inStream != nil) || (outStream != nil)) {
+        if ((inStream != nil) && (outStream != nil)) {
             // ... Use the NSStreams for communicating with the service
         }
     }];
