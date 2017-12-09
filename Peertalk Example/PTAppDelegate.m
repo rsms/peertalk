@@ -49,17 +49,13 @@
   
   // Configure the output NSTextView we use for UI feedback
   outputTextView_.textContainerInset = NSMakeSize(15.0, 10.0);
-  consoleTextAttributes_ = [NSDictionary dictionaryWithObjectsAndKeys:
-                            [NSFont fontWithName:@"helvetica" size:16.0], NSFontAttributeName,
-                            [NSColor lightGrayColor], NSForegroundColorAttributeName,
-                            nil];
-  consoleStatusTextAttributes_ = [NSDictionary dictionaryWithObjectsAndKeys:
-                                  [NSFont fontWithName:@"menlo" size:11.0], NSFontAttributeName,
-                                  [NSColor darkGrayColor], NSForegroundColorAttributeName,
-                                  nil];
+  consoleTextAttributes_ = @{NSFontAttributeName: [NSFont fontWithName:@"helvetica" size:16.0],
+                            NSForegroundColorAttributeName: [NSColor lightGrayColor]};
+  consoleStatusTextAttributes_ = @{NSFontAttributeName: [NSFont fontWithName:@"menlo" size:11.0],
+                                  NSForegroundColorAttributeName: [NSColor darkGrayColor]};
   
   // Configure the input NSTextField we use for UI input
-  [inputTextField_ setFont:[NSFont fontWithDescriptor:[[consoleTextAttributes_ objectForKey:NSFontAttributeName] fontDescriptor] size:14.0]];
+  inputTextField_.font = [NSFont fontWithDescriptor:[consoleTextAttributes_[NSFontAttributeName] fontDescriptor] size:14.0];
   [self.window makeFirstResponder:inputTextField_];
   
   // Start listening for device attached/detached notifications
@@ -72,7 +68,7 @@
   [self presentMessage:@"Ready for action — connecting at will." isStatus:YES];
   
   // Start pinging
-  [self ping];
+  //[self ping];
 }
 
 
@@ -103,7 +99,7 @@
   [NSAnimationContext beginGrouping];
   [NSAnimationContext currentContext].duration = 0.15;
   [NSAnimationContext currentContext].timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
-  NSClipView* clipView = [[self.outputTextView enclosingScrollView] contentView];
+  NSClipView* clipView = (self.outputTextView).enclosingScrollView.contentView;
   NSPoint newOrigin = clipView.bounds.origin;
   newOrigin.y += 5.0; // hack A 1/2
   [clipView setBoundsOrigin:newOrigin]; // hack A 2/2
@@ -143,13 +139,13 @@
 
 
 - (void)pongWithTag:(uint32_t)tagno error:(NSError*)error {
-  NSNumber *tag = [NSNumber numberWithUnsignedInt:tagno];
-  NSMutableDictionary *pingInfo = [pings_ objectForKey:tag];
+  NSNumber *tag = @(tagno);
+  NSMutableDictionary *pingInfo = pings_[tag];
   if (pingInfo) {
     NSDate *now = [NSDate date];
-    [pingInfo setObject:now forKey:@"date ended"];
+    pingInfo[@"date ended"] = now;
     [pings_ removeObjectForKey:tag];
-    NSLog(@"Ping total roundtrip time: %.3f ms", [now timeIntervalSinceDate:[pingInfo objectForKey:@"date created"]]*1000.0);
+    NSLog(@"Ping total roundtrip time: %.3f ms", [now timeIntervalSinceDate:pingInfo[@"date created"]]*1000.0);
   }
 }
 
@@ -160,12 +156,12 @@
       pings_ = [NSMutableDictionary dictionary];
     }
     uint32_t tagno = [connectedChannel_.protocol newTag];
-    NSNumber *tag = [NSNumber numberWithUnsignedInt:tagno];
+    NSNumber *tag = @(tagno);
     NSMutableDictionary *pingInfo = [NSMutableDictionary dictionaryWithObjectsAndKeys:[NSDate date], @"date created", nil];
-    [pings_ setObject:pingInfo forKey:tag];
+    pings_[tag] = pingInfo;
     [connectedChannel_ sendFrameOfType:PTExampleFrameTypePing tag:tagno withPayload:nil callback:^(NSError *error) {
       [self performSelector:@selector(ping) withObject:nil afterDelay:1.0];
-      [pingInfo setObject:[NSDate date] forKey:@"date sent"];
+      pingInfo[@"date sent"] = [NSDate date];
       if (error) {
         [pings_ removeObjectForKey:tag];
       }
@@ -227,22 +223,21 @@
   NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
   
   [nc addObserverForName:PTUSBDeviceDidAttachNotification object:PTUSBHub.sharedHub queue:nil usingBlock:^(NSNotification *note) {
-    NSNumber *deviceID = [note.userInfo objectForKey:@"DeviceID"];
+    NSNumber *deviceID = (note.userInfo)[@"DeviceID"];
     //NSLog(@"PTUSBDeviceDidAttachNotification: %@", note.userInfo);
     NSLog(@"PTUSBDeviceDidAttachNotification: %@", deviceID);
 
     dispatch_async(notConnectedQueue_, ^{
       if (!connectingToDeviceID_ || ![deviceID isEqualToNumber:connectingToDeviceID_]) {
         [self disconnectFromCurrentChannel];
-        connectingToDeviceID_ = deviceID;
-        connectedDeviceProperties_ = [note.userInfo objectForKey:@"Properties"];
+        connectingToDeviceID_ = deviceID;        connectedDeviceProperties_ = (note.userInfo)[@"Properties"];
         [self enqueueConnectToUSBDevice];
       }
     });
   }];
   
   [nc addObserverForName:PTUSBDeviceDidDetachNotification object:PTUSBHub.sharedHub queue:nil usingBlock:^(NSNotification *note) {
-    NSNumber *deviceID = [note.userInfo objectForKey:@"DeviceID"];
+    NSNumber *deviceID = (note.userInfo)[@"DeviceID"];
     //NSLog(@"PTUSBDeviceDidDetachNotification: %@", note.userInfo);
     NSLog(@"PTUSBDeviceDidDetachNotification: %@", deviceID);
     
@@ -308,7 +303,9 @@
 - (void)enqueueConnectToUSBDevice {
   dispatch_async(notConnectedQueue_, ^{
     dispatch_async(dispatch_get_main_queue(), ^{
-      [self connectToUSBDevice];
+        if (connectingToDeviceID_) {
+            [self connectToUSBDevice];
+        }
     });
   });
 }
