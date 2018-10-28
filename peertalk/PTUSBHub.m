@@ -71,7 +71,7 @@ static void usbmux_packet_set_payload(usbmux_packet_t *upacket,
 static usbmux_packet_t *usbmux_packet_alloc(uint32_t payloadSize) {
   assert(payloadSize <= kUsbmuxPacketMaxPayloadSize);
   uint32_t upacketSize = sizeof(usbmux_packet_t) + payloadSize;
-  usbmux_packet_t *upacket = CFAllocatorAllocate(kCFAllocatorDefault, upacketSize, 0);
+  usbmux_packet_t *upacket = (usbmux_packet_t *)CFAllocatorAllocate(kCFAllocatorDefault, upacketSize, 0);
   memset(upacket, 0, sizeof(usbmux_packet_t));
   upacket->size = upacketSize;
   return upacket;
@@ -535,8 +535,8 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
       char *buffer = NULL;
       size_t buffer_size = 0;
       PT_PRECISE_LIFETIME_UNUSED dispatch_data_t map_data = dispatch_data_create_map(data, (const void **)&buffer, &buffer_size);
-      assert(buffer_size == upacket->size - offset);
-      memcpy(((void *)(upacket))+offset, (const void *)buffer, buffer_size);
+      assert(buffer_size == (unsigned)(upacket->size - offset));
+      memcpy((void *)((uintptr_t)upacket + offset), (const void *)buffer, buffer_size);
 #if PT_DISPATCH_RETAIN_RELEASE
       dispatch_release(map_data);
 #endif
@@ -609,6 +609,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 - (void)sendDispatchData:(dispatch_data_t)data callback:(void(^)(NSError*))callback {
   off_t offset = 0;
   dispatch_io_write(channel_, offset, data, queue_, ^(bool done, dispatch_data_t data, int _errno) {
+    (void)data;
     //NSLog(@"dispatch_io_write: done=%d data=%p error=%d", done, data, error);
     if (!done)
       return;
