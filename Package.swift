@@ -16,7 +16,7 @@ let package = Package(
                 "prefix.pch",
                 "PTPrivate.h"
             ],
-            publicHeadersPath: "."
+            publicHeadersPath: "includes"
         ),
         .testTarget(
             name: "PeertalkTests",
