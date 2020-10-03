@@ -62,3 +62,16 @@ It _should_ work.
 Demo video: [http://www.youtube.com/watch?v=kQPWy8N0mBg](http://www.youtube.com/watch?v=kQPWy8N0mBg)
 
 <iframe width="880" height="530" src="http://www.youtube.com/embed/kQPWy8N0mBg?hd=1&amp;rel=0" frameborder="0" allowfullscreen></iframe>
+
+
+### macOS sandboxed mode
+
+In https://github.com/rsms/peertalk/issues/36#issuecomment-596450033 @Lessica suggests the following entitlement snippet made macOS give access to peertalk:
+
+```plist
+<key>com.apple.security.temporary-exception.sbpl</key>
+<array>
+    <string>(allow network-outbound (literal "/private/var/run/usbmuxd"))</string>
+</array>
+```
+
