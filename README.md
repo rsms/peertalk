@@ -68,7 +68,7 @@ Demo video: [http://www.youtube.com/watch?v=kQPWy8N0mBg](http://www.youtube.com/
 
 In https://github.com/rsms/peertalk/issues/36#issuecomment-596450033 @Lessica suggests the following entitlement snippet made macOS give access to peertalk:
 
-```plist
+```xml
 <key>com.apple.security.temporary-exception.sbpl</key>
 <array>
     <string>(allow network-outbound (literal "/private/var/run/usbmuxd"))</string>
