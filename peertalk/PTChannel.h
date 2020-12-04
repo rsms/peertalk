@@ -7,8 +7,8 @@
 #import <netinet/in.h>
 #import <sys/socket.h>
 
-#import "PTProtocol.h"
-#import "PTUSBHub.h"
+#import <peertalk/PTProtocol.h>
+#import <peertalk/PTUSBHub.h>
 
 @class PTData, PTAddress;
 @protocol PTChannelDelegate;
