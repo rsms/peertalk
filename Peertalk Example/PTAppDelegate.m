@@ -111,9 +111,6 @@
   newOrigin = [clipView constrainScrollPoint:newOrigin];
   [clipView.animator setBoundsOrigin:newOrigin];
   [NSAnimationContext endGrouping];
-  
-  // Scrolling w/o animation:
-  //[self.outputTextView scrollToEndOfDocument:self];
 }
 
 
@@ -332,8 +329,6 @@
     } else {
 			self->connectedDeviceID_ = self->connectingToDeviceID_;
       self.connectedChannel = channel;
-      //NSLog(@"Connected to device #%@\n%@", connectingToDeviceID_, connectedDeviceProperties_);
-      //infoTextField_.stringValue = [NSString stringWithFormat:@"Connected to device #%@\n%@", deviceID, connectedDeviceProperties_];
     }
   }];
 }

@@ -126,7 +126,6 @@
 
 // Invoked when a new frame has arrived on a channel.
 - (void)ioFrameChannel:(PTChannel*)channel didReceiveFrameOfType:(uint32_t)type tag:(uint32_t)tag payload:(PTData*)payload {
-  //NSLog(@"didReceiveFrameOfType: %u, %u, %@", type, tag, payload);
   if (type == PTExampleFrameTypeTextMessage) {
     PTExampleTextFrame *textFrame = (PTExampleTextFrame*)payload.data;
     textFrame->length = ntohl(textFrame->length);

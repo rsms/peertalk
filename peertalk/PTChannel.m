@@ -163,13 +163,6 @@ static const uint8_t kUserInfoKey;
 }
 
 
-//- (void)setFileDescriptor:(dispatch_fd_t)fd {
-//  [self setDispatchChannel:dispatch_io_create(DISPATCH_IO_STREAM, fd, protocol_.queue, ^(int error) {
-//    close(fd);
-//  })];
-//}
-
-
 #pragma mark - Connecting
 
 
@@ -239,15 +232,7 @@ static const uint8_t kUserInfoKey;
     if (callback) callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil], nil);
     return;
   }
-  
-  // get actual address
-  //if (getsockname(fd, (struct sockaddr*)&addr, (socklen_t*)&addr.sin_len) == -1) {
-  //  error = errno;
-  //  close(fd);
-  //  if (callback) callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil], nil);
-  //  return;
-  //}
-  
+
   dispatch_io_t dispatchChannel = dispatch_io_create(DISPATCH_IO_STREAM, fd, protocol_.queue, ^(int error) {
     close(fd);
     if (self->delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
@@ -340,7 +325,6 @@ static const uint8_t kUserInfoKey;
   });
   
   dispatch_resume(dispatchObj_source_);
-  //NSLog(@"%@ opened on fd #%d", self, fd);
   
   connState_ = kConnStateListening;
   if (callback) callback(nil);

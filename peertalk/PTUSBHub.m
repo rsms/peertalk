@@ -444,7 +444,6 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
     // Interpret the package we just received
     if (packetTag == 0) {
       // Broadcast message
-      //NSLog(@"Received broadcast: %@", packet);
       if (broadcastHandler) broadcastHandler(packet);
 		} else if (self->responseQueue_) {
       // Reply
@@ -472,8 +471,6 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 
   // Read the first `sizeof(ref_upacket.size)` bytes off the channel_
   dispatch_io_read(channel_, 0, sizeof(ref_upacket.size), queue_, ^(bool done, dispatch_data_t data, int error) {
-    //NSLog(@"dispatch_io_read 0,4: done=%d data=%p error=%d", done, data, error);
-    
     if (!done)
       return;
     
@@ -578,8 +575,6 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
     // Free packet when data is freed
     usbmux_packet_free(upacket);
   });
-  //NSData *data1 = [NSData dataWithBytesNoCopy:(void*)upacket length:upacket->size freeWhenDone:NO];
-  //[data1 writeToFile:[NSString stringWithFormat:@"/Users/rsms/c-packet-%u.data", tag] atomically:NO];
   [self sendDispatchData:data callback:callback];
 }
 
