@@ -5,23 +5,26 @@
   __weak PTChannel *serverChannel_;
   __weak PTChannel *peerChannel_;
 }
-- (void)appendOutputMessage:(NSString*)message;
-- (void)sendDeviceInfo;
+@property (nonatomic) IBOutlet UIStackView *stackView;
+@property (nonatomic) IBOutlet UITextView *outputTextView;
+@property (nonatomic) IBOutlet UITextField *inputTextField;
+@property (nonatomic) IBOutlet NSLayoutConstraint *bottomConstraint;
 @end
 
 @implementation PTViewController
 
+@synthesize stackView = stackView_;
+@synthesize bottomConstraint = bottomConstraint_;
 @synthesize outputTextView = outputTextView_;
 @synthesize inputTextField = inputTextField_;
 
 - (void)viewDidLoad {
   [super viewDidLoad];
-  
+
+	[[NSNotificationCenter defaultCenter] addObserver:self selector:@selector(keyboardWillShow:) name:UIKeyboardWillShowNotification object:nil];
+
   // Setup UI
-  inputTextField_.delegate = self;
-  inputTextField_.enablesReturnKeyAutomatically = NO;
   [inputTextField_ becomeFirstResponder];
-  outputTextView_.text = @"";
   
   // Create a new channel that is listening on our IPv4 port
   PTChannel *channel = [PTChannel channelWithDelegate:self];
@@ -35,14 +38,19 @@
   }];
 }
 
+- (void)keyboardWillShow:(NSNotification *)notification {
+	CGRect keybordEndFrame = [notification.userInfo[UIKeyboardFrameEndUserInfoKey] CGRectValue];
+	bottomConstraint_.constant = -keybordEndFrame.size.height;
+}
+
 - (UIInterfaceOrientationMask)supportedInterfaceOrientations {
 	return UIInterfaceOrientationMaskPortrait;
 }
 
 - (BOOL)textFieldShouldReturn:(UITextField *)textField {
   if (peerChannel_) {
-    [self sendMessage:self.inputTextField.text];
-    self.inputTextField.text = @"";
+    [self sendMessage:inputTextField_.text];
+    inputTextField_.text = @"";
     return NO;
   } else {
     return YES;
@@ -65,12 +73,12 @@
 
 - (void)appendOutputMessage:(NSString*)message {
   NSLog(@">> %@", message);
-  NSString *text = self.outputTextView.text;
+  NSString *text = outputTextView_.text;
   if (text.length == 0) {
-    self.outputTextView.text = [text stringByAppendingString:message];
+    outputTextView_.text = [text stringByAppendingString:message];
   } else {
-    self.outputTextView.text = [text stringByAppendingFormat:@"\n%@", message];
-    [self.outputTextView scrollRangeToVisible:NSMakeRange(self.outputTextView.text.length, 0)];
+    outputTextView_.text = [text stringByAppendingFormat:@"\n%@", message];
+    [outputTextView_ scrollRangeToVisible:NSMakeRange(outputTextView_.text.length, 0)];
   }
 }
 
