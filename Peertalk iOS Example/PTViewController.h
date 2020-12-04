@@ -1,6 +1,6 @@
 #import <UIKit/UIKit.h>
 #import "PTChannel.h"
 
-@interface PTViewController : UIViewController <PTChannelDelegate, UITextFieldDelegate>
+@interface PTViewController : UIViewController
 
 @end

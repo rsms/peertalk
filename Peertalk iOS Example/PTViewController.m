@@ -1,7 +1,10 @@
 #import "PTExampleProtocol.h"
 #import "PTViewController.h"
 
-@interface PTViewController () {
+@interface PTViewController () <
+PTChannelDelegate,
+UITextFieldDelegate
+> {
   __weak PTChannel *serverChannel_;
   __weak PTChannel *peerChannel_;
 }
