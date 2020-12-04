@@ -425,8 +425,8 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
       return;
     }
     // TODO: timeout un-triggered callbacks in responseQueue_
-    if (!responseQueue_) responseQueue_ = [NSMutableDictionary new];
-    [responseQueue_ setObject:callback forKey:[NSNumber numberWithUnsignedInt:tag]];
+		if (!self->responseQueue_) self->responseQueue_ = [NSMutableDictionary new];
+		[self->responseQueue_ setObject:callback forKey:[NSNumber numberWithUnsignedInt:tag]];
   }];
   
   // We are awaiting a response
@@ -450,12 +450,12 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
       // Broadcast message
       //NSLog(@"Received broadcast: %@", packet);
       if (broadcastHandler) broadcastHandler(packet);
-    } else if (responseQueue_) {
+		} else if (self->responseQueue_) {
       // Reply
       NSNumber *key = [NSNumber numberWithUnsignedInt:packetTag];
-      void(^requestCallback)(NSError*,NSDictionary*) = [responseQueue_ objectForKey:key];
+			void(^requestCallback)(NSError*,NSDictionary*) = [self->responseQueue_ objectForKey:key];
       if (requestCallback) {
-        [responseQueue_ removeObjectForKey:key];
+				[self->responseQueue_ removeObjectForKey:key];
         requestCallback(error, packet);
       } else {
         NSLog(@"Warning: Ignoring reply packet for which there is no registered callback. Packet => %@", packet);
@@ -463,7 +463,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
     }
     
     // Schedule reading another incoming package
-    if (autoReadPackets_) {
+		if (self->autoReadPackets_) {
       [self scheduleReadPacketWithBroadcastHandler:broadcastHandler];
     }
   }];
@@ -482,7 +482,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
       return;
     
     if (error) {
-      isReadingPackets_ = NO;
+			self->isReadingPackets_ = NO;
       callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil], nil, 0);
       return;
     }
@@ -505,14 +505,14 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
     
     // Read rest of the incoming usbmux_packet_t
     off_t offset = sizeof(ref_upacket.size);
-    dispatch_io_read(channel_, offset, upacket->size - offset, queue_, ^(bool done, dispatch_data_t data, int error) {
+		dispatch_io_read(self->channel_, offset, upacket->size - offset, self->queue_, ^(bool done, dispatch_data_t data, int error) {
       //NSLog(@"dispatch_io_read X,Y: done=%d data=%p error=%d", done, data, error);
       
       if (!done) {
         return;
       }
       
-      isReadingPackets_ = NO;
+			self->isReadingPackets_ = NO;
       
       if (error) {
         callback([[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil], nil, 0);

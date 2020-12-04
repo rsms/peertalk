@@ -202,14 +202,14 @@ static const uint8_t kUserInfoKey;
     if (!error) {
       [self startReadingFromConnectedChannel:dispatchChannel error:&error];
     } else {
-      connState_ = kConnStateNone;
+			self->connState_ = kConnStateNone;
     }
     if (callback) callback(error);
   } onEnd:^(NSError *error) {
-    if (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
-      [delegate_ ioFrameChannel:self didEndWithError:error];
+    if (self->delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
+      [self->delegate_ ioFrameChannel:self didEndWithError:error];
     }
-    endError_ = nil;
+		self->endError_ = nil;
   }];
 }
 
@@ -267,10 +267,10 @@ static const uint8_t kUserInfoKey;
   
   dispatch_io_t dispatchChannel = dispatch_io_create(DISPATCH_IO_STREAM, fd, protocol_.queue, ^(int error) {
     close(fd);
-    if (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
-      NSError *err = error == 0 ? endError_ : [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil];
-      [delegate_ ioFrameChannel:self didEndWithError:err];
-      endError_ = nil;
+    if (self->delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
+      NSError *err = error == 0 ? self->endError_ : [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:error userInfo:nil];
+      [self->delegate_ ioFrameChannel:self didEndWithError:err];
+			self->endError_ = nil;
     }
   });
   
@@ -342,17 +342,17 @@ static const uint8_t kUserInfoKey;
   [self setDispatchSource:dispatch_source_create(DISPATCH_SOURCE_TYPE_READ, fd, 0, protocol_.queue)];
   
   dispatch_source_set_event_handler(dispatchObj_source_, ^{
-    unsigned long nconns = dispatch_source_get_data(dispatchObj_source_);
+    unsigned long nconns = dispatch_source_get_data(self->dispatchObj_source_);
     while ([self acceptIncomingConnection:fd] && --nconns);
   });
   
-  dispatch_source_set_cancel_handler(dispatchObj_source_, ^{
+  dispatch_source_set_cancel_handler(self->dispatchObj_source_, ^{
     // Captures *self*, effectively holding a reference to *self* until cancelled.
-    dispatchObj_source_ = nil;
+		self->dispatchObj_source_ = nil;
     close(fd);
-    if (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
-      [delegate_ ioFrameChannel:self didEndWithError:endError_];
-      endError_ = nil;
+    if (self->delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_didEndWithError) {
+      [self->delegate_ ioFrameChannel:self didEndWithError:self->endError_];
+			self->endError_ = nil;
     }
   });
   
@@ -462,7 +462,7 @@ static const uint8_t kUserInfoKey;
   BOOL(^handleError)(NSError*,BOOL) = ^BOOL(NSError *error, BOOL isEOS) {
     if (error) {
       //NSLog(@"Error while communicating: %@", error);
-      endError_ = error;
+			self->endError_ = error;
       [self close];
       return YES;
     } else if (isEOS) {
@@ -477,14 +477,14 @@ static const uint8_t kUserInfoKey;
       return;
     }
     
-    BOOL accepted = (channel == dispatchObj_channel_);
-    if (accepted && (delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_shouldAcceptFrameOfType_tag_payloadSize)) {
-      accepted = [delegate_ ioFrameChannel:self shouldAcceptFrameOfType:type tag:tag payloadSize:payloadSize];
+    BOOL accepted = (channel == self->dispatchObj_channel_);
+    if (accepted && (self->delegateFlags_ & kDelegateFlagImplements_ioFrameChannel_shouldAcceptFrameOfType_tag_payloadSize)) {
+      accepted = [self->delegate_ ioFrameChannel:self shouldAcceptFrameOfType:type tag:tag payloadSize:payloadSize];
     }
     
     if (payloadSize == 0) {
-      if (accepted && delegate_) {
-        [delegate_ ioFrameChannel:self didReceiveFrameOfType:type tag:tag payload:nil];
+      if (accepted && self->delegate_) {
+        [self->delegate_ ioFrameChannel:self didReceiveFrameOfType:type tag:tag payload:nil];
       } else {
         // simply ignore the frame
       }
@@ -493,20 +493,20 @@ static const uint8_t kUserInfoKey;
       // has payload
       if (!accepted) {
         // Read and discard payload, ignoring frame
-        [protocol_ readAndDiscardDataOfSize:payloadSize overChannel:channel callback:^(NSError *error, BOOL endOfStream) {
+        [self->protocol_ readAndDiscardDataOfSize:payloadSize overChannel:channel callback:^(NSError *error, BOOL endOfStream) {
           if (!handleError(error, endOfStream)) {
             resumeReadingFrames();
           }
         }];
       } else {
-        [protocol_ readPayloadOfSize:payloadSize overChannel:channel callback:^(NSError *error, dispatch_data_t contiguousData, const uint8_t *buffer, size_t bufferSize) {
+        [self->protocol_ readPayloadOfSize:payloadSize overChannel:channel callback:^(NSError *error, dispatch_data_t contiguousData, const uint8_t *buffer, size_t bufferSize) {
           if (handleError(error, bufferSize == 0)) {
             return;
           }
           
-          if (delegate_) {
+          if (self->delegate_) {
             PTData *payload = [[PTData alloc] initWithMappedDispatchData:contiguousData data:(void*)buffer length:bufferSize];
-            [delegate_ ioFrameChannel:self didReceiveFrameOfType:type tag:tag payload:payload];
+            [self->delegate_ ioFrameChannel:self didReceiveFrameOfType:type tag:tag payload:payload];
           }
           
           resumeReadingFrames();

@@ -167,7 +167,7 @@
       [self performSelector:@selector(ping) withObject:nil afterDelay:1.0];
       [pingInfo setObject:[NSDate date] forKey:@"date sent"];
       if (error) {
-        [pings_ removeObjectForKey:tag];
+        [self->pings_ removeObjectForKey:tag];
       }
     }];
   } else {
@@ -231,11 +231,11 @@
     //NSLog(@"PTUSBDeviceDidAttachNotification: %@", note.userInfo);
     NSLog(@"PTUSBDeviceDidAttachNotification: %@", deviceID);
 
-    dispatch_async(notConnectedQueue_, ^{
-      if (!connectingToDeviceID_ || ![deviceID isEqualToNumber:connectingToDeviceID_]) {
+    dispatch_async(self->notConnectedQueue_, ^{
+      if (!self->connectingToDeviceID_ || ![deviceID isEqualToNumber:self->connectingToDeviceID_]) {
         [self disconnectFromCurrentChannel];
-        connectingToDeviceID_ = deviceID;
-        connectedDeviceProperties_ = [note.userInfo objectForKey:@"Properties"];
+				self->connectingToDeviceID_ = deviceID;
+				self->connectedDeviceProperties_ = [note.userInfo objectForKey:@"Properties"];
         [self enqueueConnectToUSBDevice];
       }
     });
@@ -246,11 +246,11 @@
     //NSLog(@"PTUSBDeviceDidDetachNotification: %@", note.userInfo);
     NSLog(@"PTUSBDeviceDidDetachNotification: %@", deviceID);
     
-    if ([connectingToDeviceID_ isEqualToNumber:deviceID]) {
-      connectedDeviceProperties_ = nil;
-      connectingToDeviceID_ = nil;
-      if (connectedChannel_) {
-        [connectedChannel_ close];
+    if ([self->connectingToDeviceID_ isEqualToNumber:deviceID]) {
+			self->connectedDeviceProperties_ = nil;
+			self->connectingToDeviceID_ = nil;
+      if (self->connectedChannel_) {
+        [self->connectedChannel_ close];
       }
     }
   }];
@@ -326,11 +326,11 @@
       } else {
         NSLog(@"Failed to connect to device #%@: %@", channel.userInfo, error);
       }
-      if (channel.userInfo == connectingToDeviceID_) {
+      if (channel.userInfo == self->connectingToDeviceID_) {
         [self performSelector:@selector(enqueueConnectToUSBDevice) withObject:nil afterDelay:PTAppReconnectDelay];
       }
     } else {
-      connectedDeviceID_ = connectingToDeviceID_;
+			self->connectedDeviceID_ = self->connectingToDeviceID_;
       self.connectedChannel = channel;
       //NSLog(@"Connected to device #%@\n%@", connectingToDeviceID_, connectedDeviceProperties_);
       //infoTextField_.stringValue = [NSString stringWithFormat:@"Connected to device #%@\n%@", deviceID, connectedDeviceProperties_];
