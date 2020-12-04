@@ -89,15 +89,6 @@ static const uint8_t kUserInfoKey;
   return [self initWithProtocol:[PTProtocol sharedProtocolForQueue:dispatch_get_main_queue()]];
 }
 
-
-- (void)dealloc {
-#if PT_DISPATCH_RETAIN_RELEASE
-  if (dispatchObj_channel_) dispatch_release(dispatchObj_channel_);
-  else if (dispatchObj_source_) dispatch_release(dispatchObj_source_);
-#endif
-}
-
-
 - (BOOL)isConnected {
   return connState_ == kConnStateConnecting || connState_ == kConnStateConnected;
 }
@@ -127,10 +118,6 @@ static const uint8_t kUserInfoKey;
   dispatch_io_t prevChannel = dispatchObj_channel_;
   if (prevChannel != channel) {
     dispatchObj_channel_ = channel;
-#if PT_DISPATCH_RETAIN_RELEASE
-    if (dispatchObj_channel_) dispatch_retain(dispatchObj_channel_);
-    if (prevChannel) dispatch_release(prevChannel);
-#endif
     if (!dispatchObj_channel_ && !dispatchObj_source_) {
       connState_ = kConnStateNone;
     }
@@ -143,10 +130,6 @@ static const uint8_t kUserInfoKey;
   dispatch_source_t prevSource = dispatchObj_source_;
   if (prevSource != source) {
     dispatchObj_source_ = source;
-#if PT_DISPATCH_RETAIN_RELEASE
-    if (dispatchObj_source_) dispatch_retain(dispatchObj_source_);
-    if (prevSource) dispatch_release(prevSource);
-#endif
     if (!dispatchObj_channel_ && !dispatchObj_source_) {
       connState_ = kConnStateNone;
     }
@@ -608,18 +591,12 @@ static const uint8_t kUserInfoKey;
 - (id)initWithMappedDispatchData:(dispatch_data_t)mappedContiguousData data:(void*)data length:(size_t)length {
   if (!(self = [super init])) return nil;
   dispatchData_ = mappedContiguousData;
-#if PT_DISPATCH_RETAIN_RELEASE
-  if (dispatchData_) dispatch_retain(dispatchData_);
-#endif
   data_ = data;
   length_ = length;
   return self;
 }
 
 - (void)dealloc {
-#if PT_DISPATCH_RETAIN_RELEASE
-  if (dispatchData_) dispatch_release(dispatchData_);
-#endif
   data_ = NULL;
   length_ = 0;
 }
