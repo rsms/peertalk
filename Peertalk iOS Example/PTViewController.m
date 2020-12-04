@@ -30,7 +30,7 @@
       [self appendOutputMessage:[NSString stringWithFormat:@"Failed to listen on 127.0.0.1:%d: %@", PTExampleProtocolIPv4PortNumber, error]];
     } else {
       [self appendOutputMessage:[NSString stringWithFormat:@"Listening on 127.0.0.1:%d", PTExampleProtocolIPv4PortNumber]];
-      serverChannel_ = channel;
+      self->serverChannel_ = channel;
     }
   }];
 }
