@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "EE158A5A1CBD3EB600A3E3F0"
-               BuildableName = "Peertalk.framework"
-               BlueprintName = "Peertalk"
+               BlueprintIdentifier = "6A88FA2F150D613800FC3647"
+               BuildableName = "libpeertalk.a"
+               BlueprintName = "peertalk"
                ReferencedContainer = "container:peertalk.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -27,26 +27,7 @@
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "EE158A5A1CBD3EB600A3E3F0"
-            BuildableName = "Peertalk.framework"
-            BlueprintName = "Peertalk"
-            ReferencedContainer = "container:peertalk.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
       <Testables>
-         <TestableReference
-            skipped = "NO">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6A88FA43150D613800FC3647"
-               BuildableName = "peertalkTests.xctest"
-               BlueprintName = "peertalkTests"
-               ReferencedContainer = "container:peertalk.xcodeproj">
-            </BuildableReference>
-         </TestableReference>
       </Testables>
    </TestAction>
    <LaunchAction
@@ -59,15 +40,6 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "EE158A5A1CBD3EB600A3E3F0"
-            BuildableName = "Peertalk.framework"
-            BlueprintName = "Peertalk"
-            ReferencedContainer = "container:peertalk.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -78,9 +50,9 @@
       <MacroExpansion>
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "EE158A5A1CBD3EB600A3E3F0"
-            BuildableName = "Peertalk.framework"
-            BlueprintName = "Peertalk"
+            BlueprintIdentifier = "6A88FA2F150D613800FC3647"
+            BuildableName = "libpeertalk.a"
+            BlueprintName = "peertalk"
             ReferencedContainer = "container:peertalk.xcodeproj">
          </BuildableReference>
       </MacroExpansion>
