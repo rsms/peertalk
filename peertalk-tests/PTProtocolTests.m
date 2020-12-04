@@ -52,7 +52,7 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
 #pragma mark -
 #pragma mark Helpers
 
-- (void)write:(dispatch_data_t)data callback:(void(^)())callback {
+- (void)write:(dispatch_data_t)data callback:(void(^)(void))callback {
   dispatch_io_write(channel_[0], 0, data, queue_[0], ^(bool done, dispatch_data_t data, int error) {
     if (done) {
       XCTAssertEqual(error, (int)0, @"Expected error == 0");
