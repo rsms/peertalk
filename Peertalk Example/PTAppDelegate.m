@@ -104,12 +104,14 @@
   [NSAnimationContext currentContext].duration = 0.15;
   [NSAnimationContext currentContext].timingFunction = [CAMediaTimingFunction functionWithName:kCAMediaTimingFunctionEaseInEaseOut];
   NSClipView* clipView = [[self.outputTextView enclosingScrollView] contentView];
-  NSPoint newOrigin = clipView.bounds.origin;
+	NSRect clipViewBounds = clipView.bounds;
+  NSPoint newOrigin = clipViewBounds.origin;
   newOrigin.y += 5.0; // hack A 1/2
   [clipView setBoundsOrigin:newOrigin]; // hack A 2/2
   newOrigin.y += 1000.0;
-  newOrigin = [clipView constrainScrollPoint:newOrigin];
-  [clipView.animator setBoundsOrigin:newOrigin];
+	clipViewBounds.origin = newOrigin;
+  clipViewBounds = [clipView constrainBoundsRect:clipViewBounds];
+  [clipView.animator setBoundsOrigin:clipViewBounds.origin];
   [NSAnimationContext endGrouping];
 }
 
