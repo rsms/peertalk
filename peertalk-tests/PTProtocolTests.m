@@ -24,14 +24,14 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
   queue_[0] = dispatch_queue_create("PTProtocolTests.queue_[0]", DISPATCH_QUEUE_SERIAL);
   PTAssertNotNULL(queue_[0]);
   channel_[0] = dispatch_io_create(DISPATCH_IO_STREAM, socket_[0], queue_[0], ^(int error) {
-    close(socket_[0]);
+    close(self->socket_[0]);
   });
   PTAssertNotNULL(channel_[0]);
   
   queue_[1] = dispatch_queue_create("PTProtocolTests.queue_[1]", DISPATCH_QUEUE_SERIAL);
   PTAssertNotNULL(queue_[1]);
   channel_[1] = dispatch_io_create(DISPATCH_IO_STREAM, socket_[1], queue_[1], ^(int error) {
-    close(socket_[1]);
+    close(self->socket_[1]);
   });
   PTAssertNotNULL(channel_[1]);
   
@@ -107,7 +107,7 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
     XCTAssertEqual(receivedPayloadSize, expectedPayloadSize);
     
     if (expectedPayloadSize != 0) {
-      [protocol_[clientIndex] readPayloadOfSize:receivedPayloadSize overChannel:channel_[clientIndex] callback:^(NSError *error, dispatch_data_t contiguousData, const uint8_t *buffer, size_t bufferSize) {
+      [self->protocol_[clientIndex] readPayloadOfSize:receivedPayloadSize overChannel:self->channel_[clientIndex] callback:^(NSError *error, dispatch_data_t contiguousData, const uint8_t *buffer, size_t bufferSize) {
         PTAssertNotNULL(contiguousData);
         PTAssertNotNULL(buffer);
         XCTAssertEqual((uint32_t)bufferSize, receivedPayloadSize);
@@ -191,7 +191,7 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
     XCTAssertEqual(receivedPayloadSize, payloadSize);
     
     // Reply on channel 1
-    [protocol_[1] sendFrameOfType:PTFrameTypeTestPingReply tag:receivedFrameTag withPayload:nil overChannel:channel_[1] callback:^(NSError *error) {
+    [self->protocol_[1] sendFrameOfType:PTFrameTypeTestPingReply tag:receivedFrameTag withPayload:nil overChannel:self->channel_[1] callback:^(NSError *error) {
       if (error) XCTFail(@"sendFrameOfType failed: %@", error);
     }];
   }];
@@ -326,7 +326,7 @@ static const uint32_t PTFrameTypeTestPingReply = PTFrameTypeTestPing - 1;
     };
     
     if (payloadSize) {
-      [protocol_[1] readPayloadOfSize:payloadSize overChannel:channel_[1] callback:^(NSError *error, dispatch_data_t contiguousData, const uint8_t *buffer, size_t bufferSize) {
+      [self->protocol_[1] readPayloadOfSize:payloadSize overChannel:self->channel_[1] callback:^(NSError *error, dispatch_data_t contiguousData, const uint8_t *buffer, size_t bufferSize) {
         PTAssertNotNULL(contiguousData);
         PTAssertNotNULL(buffer);
         XCTAssertEqual((uint32_t)bufferSize, payloadSize);
