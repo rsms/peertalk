@@ -35,13 +35,6 @@
   }];
 }
 
-- (void)viewDidUnload {
-  if (serverChannel_) {
-    [serverChannel_ close];
-  }
-  [super viewDidUnload];
-}
-
 - (BOOL)shouldAutorotateToInterfaceOrientation:(UIInterfaceOrientation)interfaceOrientation {
   return interfaceOrientation == UIInterfaceOrientationPortrait;
 }
