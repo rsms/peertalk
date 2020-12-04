@@ -63,7 +63,7 @@ UITextFieldDelegate
 - (void)sendMessage:(NSString*)message {
   if (peerChannel_) {
     dispatch_data_t payload = PTExampleTextDispatchDataWithString(message);
-    [peerChannel_ sendFrameOfType:PTExampleFrameTypeTextMessage tag:PTFrameNoTag withPayload:payload callback:^(NSError *error) {
+    [peerChannel_ sendFrameOfType:PTExampleFrameTypeTextMessage tag:PTFrameNoTag withPayload:(NSData *)payload callback:^(NSError *error) {
       if (error) {
         NSLog(@"Failed to send message: %@", error);
       }
@@ -110,7 +110,7 @@ UITextFieldDelegate
                         [NSNumber numberWithDouble:screen.scale], @"screenScale",
                         nil];
   dispatch_data_t payload = [info createReferencingDispatchData];
-  [peerChannel_ sendFrameOfType:PTExampleFrameTypeDeviceInfo tag:PTFrameNoTag withPayload:payload callback:^(NSError *error) {
+  [peerChannel_ sendFrameOfType:PTExampleFrameTypeDeviceInfo tag:PTFrameNoTag withPayload:(NSData *)payload callback:^(NSError *error) {
     if (error) {
       NSLog(@"Failed to send PTExampleFrameTypeDeviceInfo: %@", error);
     }
@@ -136,9 +136,9 @@ UITextFieldDelegate
 }
 
 // Invoked when a new frame has arrived on a channel.
-- (void)ioFrameChannel:(PTChannel*)channel didReceiveFrameOfType:(uint32_t)type tag:(uint32_t)tag payload:(PTData*)payload {
+- (void)ioFrameChannel:(PTChannel*)channel didReceiveFrameOfType:(uint32_t)type tag:(uint32_t)tag payload:(NSData *)payload {
   if (type == PTExampleFrameTypeTextMessage) {
-    PTExampleTextFrame *textFrame = (PTExampleTextFrame*)payload.data;
+    PTExampleTextFrame *textFrame = (PTExampleTextFrame*)payload.bytes;
     textFrame->length = ntohl(textFrame->length);
     NSString *message = [[NSString alloc] initWithBytes:textFrame->utf8text length:textFrame->length encoding:NSUTF8StringEncoding];
     [self appendOutputMessage:[NSString stringWithFormat:@"[%@]: %@", channel.userInfo, message]];

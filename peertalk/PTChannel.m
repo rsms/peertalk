@@ -64,29 +64,26 @@ static const uint8_t kUserInfoKey;
 
 @synthesize protocol = protocol_;
 
-
 + (PTChannel*)channelWithDelegate:(id<PTChannelDelegate>)delegate {
-  return [[PTChannel alloc] initWithProtocol:[PTProtocol sharedProtocolForQueue:dispatch_get_main_queue()] delegate:delegate];
+  return [[PTChannel alloc] initWithProtocol:nil delegate:delegate];
 }
 
 
-- (id)initWithProtocol:(PTProtocol*)protocol delegate:(id<PTChannelDelegate>)delegate {
+- (id)initWithProtocol:(PTProtocol *)protocol delegate:(id<PTChannelDelegate>)delegate {
   if (!(self = [super init])) return nil;
-  protocol_ = protocol;
+	protocol_ = protocol ? protocol : [PTProtocol sharedProtocolForQueue:dispatch_get_main_queue()];
   self.delegate = delegate;
   return self;
 }
 
 
-- (id)initWithProtocol:(PTProtocol*)protocol {
-  if (!(self = [super init])) return nil;
-  protocol_ = protocol;
-  return self;
+- (id)initWithProtocol:(PTProtocol *)protocol {
+	return [self initWithProtocol:protocol delegate:nil];
 }
 
 
 - (id)init {
-  return [self initWithProtocol:[PTProtocol sharedProtocolForQueue:dispatch_get_main_queue()]];
+  return [self initWithProtocol:[PTProtocol sharedProtocolForQueue:dispatch_get_main_queue()] delegate:nil];
 }
 
 - (BOOL)isConnected {
@@ -472,8 +469,8 @@ static const uint8_t kUserInfoKey;
           }
           
           if (self->delegate_) {
-            PTData *payload = [[PTData alloc] initWithMappedDispatchData:contiguousData data:(void*)buffer length:bufferSize];
-            [self->delegate_ ioFrameChannel:self didReceiveFrameOfType:type tag:tag payload:payload];
+						// dispatch_data_t can be cast to (NSData *)
+            [self->delegate_ ioFrameChannel:self didReceiveFrameOfType:type tag:tag payload:(NSData *)contiguousData];
           }
           
           resumeReadingFrames();
@@ -488,9 +485,10 @@ static const uint8_t kUserInfoKey;
 
 #pragma mark - Sending
 
-- (void)sendFrameOfType:(uint32_t)frameType tag:(uint32_t)tag withPayload:(dispatch_data_t)payload callback:(void(^)(NSError *error))callback {
+- (void)sendFrameOfType:(uint32_t)frameType tag:(uint32_t)tag withPayload:(NSData *)payload callback:(void(^)(NSError *error))callback {
   if (connState_ == kConnStateConnecting || connState_ == kConnStateConnected) {
-    [protocol_ sendFrameOfType:frameType tag:tag withPayload:payload overChannel:dispatchObj_channel_ callback:callback];
+		dispatch_data_t payloadCopy = dispatch_data_create(payload.bytes, payload.length, NULL, DISPATCH_DATA_DESTRUCTOR_DEFAULT);
+    [protocol_ sendFrameOfType:frameType tag:tag withPayload:payloadCopy overChannel:dispatchObj_channel_ callback:callback];
   } else if (callback) {
     callback([NSError errorWithDomain:NSPOSIXErrorDomain code:EPERM userInfo:nil]);
   }

@@ -1,6 +1,9 @@
 #import "PTAppDelegate.h"
-#import "PTUSBHub.h"
+
 #import "PTExampleProtocol.h"
+
+#import <peertalk/PTProtocol.h>
+#import <peertalk/PTUSBHub.h>
 #import <QuartzCore/QuartzCore.h>
 
 @interface PTAppDelegate () {
@@ -80,7 +83,7 @@
   if (connectedChannel_) {
     NSString *message = self.inputTextField.stringValue;
     dispatch_data_t payload = PTExampleTextDispatchDataWithString(message);
-    [connectedChannel_ sendFrameOfType:PTExampleFrameTypeTextMessage tag:PTFrameNoTag withPayload:payload callback:^(NSError *error) {
+    [connectedChannel_ sendFrameOfType:PTExampleFrameTypeTextMessage tag:PTFrameNoTag withPayload:(NSData *)payload callback:^(NSError *error) {
       if (error) {
         NSLog(@"Failed to send message: %@", error);
       }
@@ -192,13 +195,13 @@
   }
 }
 
-- (void)ioFrameChannel:(PTChannel*)channel didReceiveFrameOfType:(uint32_t)type tag:(uint32_t)tag payload:(PTData*)payload {
+- (void)ioFrameChannel:(PTChannel*)channel didReceiveFrameOfType:(uint32_t)type tag:(uint32_t)tag payload:(NSData *)payload {
   //NSLog(@"received %@, %u, %u, %@", channel, type, tag, payload);
   if (type == PTExampleFrameTypeDeviceInfo) {
-    NSDictionary *deviceInfo = [NSDictionary dictionaryWithContentsOfDispatchData:payload.dispatchData];
+		NSDictionary *deviceInfo = [NSData dictionaryWithContentsOfData:payload];
     [self presentMessage:[NSString stringWithFormat:@"Connected to %@", deviceInfo.description] isStatus:YES];
   } else if (type == PTExampleFrameTypeTextMessage) {
-    PTExampleTextFrame *textFrame = (PTExampleTextFrame*)payload.data;
+    PTExampleTextFrame *textFrame = (PTExampleTextFrame*)payload.bytes;
     textFrame->length = ntohl(textFrame->length);
     NSString *message = [[NSString alloc] initWithBytes:textFrame->utf8text length:textFrame->length encoding:NSUTF8StringEncoding];
     [self presentMessage:[NSString stringWithFormat:@"[%@]: %@", channel.userInfo, message] isStatus:NO];

@@ -14,9 +14,9 @@
             buildForAnalyzing = "YES">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "6A88FA2F150D613800FC3647"
-               BuildableName = "libpeertalk.a"
-               BlueprintName = "peertalk"
+               BlueprintIdentifier = "6A64AAC5152604D40065BF86"
+               BuildableName = "Peertalk macOS Example.app"
+               BlueprintName = "Peertalk macOS Example"
                ReferencedContainer = "container:peertalk.xcodeproj">
             </BuildableReference>
          </BuildActionEntry>
@@ -40,6 +40,16 @@
       debugDocumentVersioning = "YES"
       debugServiceExtension = "internal"
       allowLocationSimulation = "YES">
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
+         <BuildableReference
+            BuildableIdentifier = "primary"
+            BlueprintIdentifier = "6A64AAC5152604D40065BF86"
+            BuildableName = "Peertalk macOS Example.app"
+            BlueprintName = "Peertalk macOS Example"
+            ReferencedContainer = "container:peertalk.xcodeproj">
+         </BuildableReference>
+      </BuildableProductRunnable>
    </LaunchAction>
    <ProfileAction
       buildConfiguration = "Release"
@@ -47,15 +57,16 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <MacroExpansion>
+      <BuildableProductRunnable
+         runnableDebuggingMode = "0">
          <BuildableReference
             BuildableIdentifier = "primary"
-            BlueprintIdentifier = "6A88FA2F150D613800FC3647"
-            BuildableName = "libpeertalk.a"
-            BlueprintName = "peertalk"
+            BlueprintIdentifier = "6A64AAC5152604D40065BF86"
+            BuildableName = "Peertalk macOS Example.app"
+            BlueprintName = "Peertalk macOS Example"
             ReferencedContainer = "container:peertalk.xcodeproj">
          </BuildableReference>
-      </MacroExpansion>
+      </BuildableProductRunnable>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">

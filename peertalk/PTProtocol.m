@@ -309,6 +309,14 @@ static void _release_queue_local_protocol(void *objcobj) {
   return newData;
 }
 
+// Decode *data* as a peroperty list-encoded dictionary. Returns nil on failure.
++ (NSDictionary *)dictionaryWithContentsOfData:(NSData *)data {
+	if (!data) {
+		return nil;
+	}
+	return [NSPropertyListSerialization propertyListWithData:data options:NSPropertyListImmutable format:NULL error:nil];
+}
+
 @end
 
 
@@ -324,20 +332,4 @@ static void _release_queue_local_protocol(void *objcobj) {
     return [plistData createReferencingDispatchData];
   }
 }
-
-// Decode *data* as a peroperty list-encoded dictionary. Returns nil on failure.
-+ (NSDictionary*)dictionaryWithContentsOfDispatchData:(dispatch_data_t)data {
-  if (!data) {
-    return nil;
-  }
-  uint8_t *buffer = NULL;
-  size_t bufferSize = 0;
-  PT_PRECISE_LIFETIME dispatch_data_t contiguousData = dispatch_data_create_map(data, (const void **)&buffer, &bufferSize);
-  if (!contiguousData) {
-    return nil;
-  }
-  NSDictionary *dict = [NSPropertyListSerialization propertyListWithData:[NSData dataWithBytesNoCopy:(void*)buffer length:bufferSize freeWhenDone:NO] options:NSPropertyListImmutable format:NULL error:nil];
-  return dict;
-}
-
 @end
