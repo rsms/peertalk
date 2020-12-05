@@ -48,11 +48,6 @@
 static const uint8_t kUserInfoKey;
 
 #pragma mark -
-@interface PTData ()
-- (id)initWithMappedDispatchData:(dispatch_data_t)mappedContiguousData data:(void*)data length:(size_t)length;
-@end
-
-#pragma mark -
 @interface PTAddress () {
   struct sockaddr_storage sockaddr_;
 }
@@ -561,33 +556,3 @@ static const uint8_t kUserInfoKey;
 }
 
 @end
-
-
-#pragma mark -
-@implementation PTData
-
-@synthesize dispatchData = dispatchData_;
-@synthesize data = data_;
-@synthesize length = length_;
-
-- (id)initWithMappedDispatchData:(dispatch_data_t)mappedContiguousData data:(void*)data length:(size_t)length {
-  if (!(self = [super init])) return nil;
-  dispatchData_ = mappedContiguousData;
-  data_ = data;
-  length_ = length;
-  return self;
-}
-
-- (void)dealloc {
-  data_ = NULL;
-  length_ = 0;
-}
-
-#pragma mark - NSObject
-
-- (NSString*)description {
-  return [NSString stringWithFormat:@"<PTData: %p (%zu bytes)>", self, length_];
-}
-
-@end
-

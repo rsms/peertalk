@@ -11,7 +11,7 @@
 #import <peertalk/PTUSBHub.h>
 #import <peertalk/PTDefines.h>
 
-@class PTData, PTAddress;
+@class PTAddress;
 @protocol PTChannelDelegate;
 
 NS_ASSUME_NONNULL_BEGIN
@@ -83,17 +83,6 @@ PT_FINAL @interface PTChannel : NSObject
 - (void)cancel;
 
 @end
-
-
-// Wraps a mapped dispatch_data_t object. The memory pointed to by *data* is
-// valid until *dispatchData* is deallocated (normally when the receiver is
-// deallocated).
-PT_FINAL @interface PTData : NSObject
-@property (readonly) dispatch_data_t dispatchData;
-@property (readonly) void *data;
-@property (readonly) size_t length;
-@end
-
 
 // Represents a peer's address
 PT_FINAL @interface PTAddress : NSObject
