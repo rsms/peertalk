@@ -42,7 +42,9 @@ typedef enum {
 @interface PTUSBHub : NSObject
 
 // Shared, implicitly opened hub.
-+ (PTUSBHub*)sharedHub;
++ (instancetype)sharedHub;
+
+- (instancetype)init NS_UNAVAILABLE;
 
 // Connect to a TCP *port* on a device, while the actual transport is over USB.
 // Upon success, *error* is nil and *channel* is a duplex I/O channel.
