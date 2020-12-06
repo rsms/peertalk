@@ -7,5 +7,6 @@ FOUNDATION_EXPORT double PeertalkVersionNumber;
 FOUNDATION_EXPORT const unsigned char PeertalkVersionString[];
 
 #import <peertalk/PTChannel.h>
+#import <peertalk/PTDefines.h>
 #import <peertalk/PTProtocol.h>
 #import <peertalk/PTUSBHub.h>
