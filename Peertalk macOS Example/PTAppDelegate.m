@@ -229,7 +229,7 @@
   NSNotificationCenter *nc = [NSNotificationCenter defaultCenter];
   
   [nc addObserverForName:PTUSBDeviceDidAttachNotification object:PTUSBHub.sharedHub queue:nil usingBlock:^(NSNotification *note) {
-    NSNumber *deviceID = [note.userInfo objectForKey:@"DeviceID"];
+    NSNumber *deviceID = [note.userInfo objectForKey:PTUSBHubNotificationKeyDeviceID];
     //NSLog(@"PTUSBDeviceDidAttachNotification: %@", note.userInfo);
     NSLog(@"PTUSBDeviceDidAttachNotification: %@", deviceID);
 
@@ -237,14 +237,14 @@
       if (!self->connectingToDeviceID_ || ![deviceID isEqualToNumber:self->connectingToDeviceID_]) {
         [self disconnectFromCurrentChannel];
 				self->connectingToDeviceID_ = deviceID;
-				self->connectedDeviceProperties_ = [note.userInfo objectForKey:@"Properties"];
+				self->connectedDeviceProperties_ = [note.userInfo objectForKey:PTUSBHubNotificationKeyProperties];
         [self enqueueConnectToUSBDevice];
       }
     });
   }];
   
   [nc addObserverForName:PTUSBDeviceDidDetachNotification object:PTUSBHub.sharedHub queue:nil usingBlock:^(NSNotification *note) {
-    NSNumber *deviceID = [note.userInfo objectForKey:@"DeviceID"];
+    NSNumber *deviceID = [note.userInfo objectForKey:PTUSBHubNotificationKeyDeviceID];
     //NSLog(@"PTUSBDeviceDidDetachNotification: %@", note.userInfo);
     NSLog(@"PTUSBDeviceDidDetachNotification: %@", deviceID);
     

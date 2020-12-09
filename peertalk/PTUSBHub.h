@@ -18,7 +18,7 @@
 //    };
 //  }
 //
-FOUNDATION_EXPORT NSString * const PTUSBDeviceDidAttachNotification;
+FOUNDATION_EXPORT NSNotificationName const PTUSBDeviceDidAttachNotification NS_SWIFT_NAME(deviceDidAttach);
 
 // PTUSBDeviceDidDetachNotification
 // Posted when a device has been detached.
@@ -28,7 +28,12 @@ FOUNDATION_EXPORT NSString * const PTUSBDeviceDidAttachNotification;
 //    MessageType = Detached;
 //  }
 //
-FOUNDATION_EXPORT NSString * const PTUSBDeviceDidDetachNotification;
+FOUNDATION_EXPORT NSNotificationName const PTUSBDeviceDidDetachNotification NS_SWIFT_NAME(deviceDidDetach);
+
+typedef NSString * PTUSBHubNotificationKey NS_TYPED_ENUM;
+FOUNDATION_EXPORT PTUSBHubNotificationKey const PTUSBHubNotificationKeyDeviceID NS_SWIFT_NAME(deviceID);
+FOUNDATION_EXPORT PTUSBHubNotificationKey const PTUSBHubNotificationKeyMessageType NS_SWIFT_NAME(messageType);
+FOUNDATION_EXPORT PTUSBHubNotificationKey const PTUSBHubNotificationKeyProperties NS_SWIFT_NAME(properties);
 
 // NSError domain
 FOUNDATION_EXPORT NSString * const PTUSBHubErrorDomain;

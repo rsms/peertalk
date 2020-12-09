@@ -106,12 +106,15 @@ static void usbmux_packet_free(usbmux_packet_t *upacket) {
 }
 
 
-NSString * const PTUSBDeviceDidAttachNotification = @"PTUSBDeviceDidAttachNotification";
-NSString * const PTUSBDeviceDidDetachNotification = @"PTUSBDeviceDidDetachNotification";
+NSNotificationName const PTUSBDeviceDidAttachNotification = @"PTUSBDeviceDidAttachNotification";
+NSNotificationName const PTUSBDeviceDidDetachNotification = @"PTUSBDeviceDidDetachNotification";
+
+PTUSBHubNotificationKey const PTUSBHubNotificationKeyDeviceID = @"DeviceID";
+PTUSBHubNotificationKey const PTUSBHubNotificationKeyMessageType = @"MessageType";
+PTUSBHubNotificationKey const PTUSBHubNotificationKeyProperties = @"Properties";
 
 static NSString *kPlistPacketTypeListen = @"Listen";
 static NSString *kPlistPacketTypeConnect = @"Connect";
-
 
 // Represents a channel of communication between the host process and a remote
 // (device) system. In practice, a PTUSBChannel is connected to a usbmuxd
@@ -232,7 +235,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
   
   NSDictionary *packet = [PTUSBChannel packetDictionaryWithPacketType:kPlistPacketTypeConnect
                                                              payload:[NSDictionary dictionaryWithObjectsAndKeys:
-                                                                      deviceID, @"DeviceID",
+                                                                      deviceID, PTUSBHubNotificationKeyDeviceID,
                                                                       [NSNumber numberWithInt:port], @"PortNumber",
                                                                       nil]];
   
@@ -245,7 +248,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
 
 
 - (void)handleBroadcastPacket:(NSDictionary*)packet {
-  NSString *messageType = [packet objectForKey:@"MessageType"];
+  NSString *messageType = [packet objectForKey:PTUSBHubNotificationKeyMessageType];
   
   if ([@"Attached" isEqualToString:messageType]) {
     [[NSNotificationCenter defaultCenter] postNotificationName:PTUSBDeviceDidAttachNotification object:self userInfo:packet];
@@ -279,12 +282,12 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
   
   if (bundleName) {
     packet = [NSDictionary dictionaryWithObjectsAndKeys:
-              messageType, @"MessageType",
+              messageType, PTUSBHubNotificationKeyMessageType,
               bundleName, @"ProgName",
               bundleVersion, @"ClientVersionString",
               nil];
   } else {
-    packet = [NSDictionary dictionaryWithObjectsAndKeys:messageType, @"MessageType", nil];
+    packet = [NSDictionary dictionaryWithObjectsAndKeys:messageType, PTUSBHubNotificationKeyMessageType, nil];
   }
   
   if (payload) {
@@ -345,7 +348,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
   // Connect socket
   struct sockaddr_un addr;
   addr.sun_family = AF_UNIX;
-  strcpy(addr.sun_path, "/var/run/usbmuxd");
+  strcpy(addr.sun_path, "/private/var/run/usbmuxd");
   socklen_t socklen = sizeof(addr);
   if (connect(fd, (struct sockaddr*)&addr, socklen) == -1) {
     if (error) *error = [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil];
