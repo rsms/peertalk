@@ -165,7 +165,7 @@ static const uint8_t kUserInfoKey;
     return;
   }
   connState_ = kConnStateConnecting;
-  [usbHub connectToDevice:deviceID port:port onStart:^(NSError *err, dispatch_io_t dispatchChannel) {
+  [usbHub connectToDevice:deviceID port:port onQueue:protocol_.queue onStart:^(NSError *err, dispatch_io_t dispatchChannel) {
     NSError *error = err;
     if (!error) {
       [self startReadingFromConnectedChannel:dispatchChannel error:&error];
