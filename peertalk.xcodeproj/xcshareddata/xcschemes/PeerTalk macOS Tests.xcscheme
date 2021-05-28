@@ -5,22 +5,6 @@
    <BuildAction
       parallelizeBuildables = "YES"
       buildImplicitDependencies = "YES">
-      <BuildActionEntries>
-         <BuildActionEntry
-            buildForTesting = "YES"
-            buildForRunning = "YES"
-            buildForProfiling = "YES"
-            buildForArchiving = "YES"
-            buildForAnalyzing = "YES">
-            <BuildableReference
-               BuildableIdentifier = "primary"
-               BlueprintIdentifier = "AB6C9945257BB67A00D5624E"
-               BuildableName = "PeerTalk.framework"
-               BlueprintName = "PeerTalk iOS"
-               ReferencedContainer = "container:PeerTalk.xcodeproj">
-            </BuildableReference>
-         </BuildActionEntry>
-      </BuildActionEntries>
    </BuildAction>
    <TestAction
       buildConfiguration = "Debug"
@@ -32,9 +16,9 @@
             skipped = "NO">
             <BuildableReference
                BuildableIdentifier = "primary"
-               BlueprintIdentifier = "4035B8692660DCDF00331D86"
-               BuildableName = "PeerTalk iOS Tests.xctest"
-               BlueprintName = "PeerTalk iOS Tests"
+               BlueprintIdentifier = "4035B8782660DE7A00331D86"
+               BuildableName = "PeerTalk macOS Tests.xctest"
+               BlueprintName = "PeerTalk macOS Tests"
                ReferencedContainer = "container:PeerTalk.xcodeproj">
             </BuildableReference>
          </TestableReference>
@@ -57,15 +41,6 @@
       savedToolIdentifier = ""
       useCustomWorkingDirectory = "NO"
       debugDocumentVersioning = "YES">
-      <MacroExpansion>
-         <BuildableReference
-            BuildableIdentifier = "primary"
-            BlueprintIdentifier = "AB6C9945257BB67A00D5624E"
-            BuildableName = "PeerTalk.framework"
-            BlueprintName = "PeerTalk iOS"
-            ReferencedContainer = "container:PeerTalk.xcodeproj">
-         </BuildableReference>
-      </MacroExpansion>
    </ProfileAction>
    <AnalyzeAction
       buildConfiguration = "Debug">
