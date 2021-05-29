@@ -1,0 +1,5 @@
+framework module PeerTalk {
+    umbrella header "PeerTalk.h"
+    export *
+    module * { export * }
+}
