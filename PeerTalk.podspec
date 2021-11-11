@@ -10,7 +10,7 @@ Pod::Spec.new do |spec|
     spec.summary  = 'iOS and OS X Cocoa library for communicating over USB and TCP.'
 
     spec.source   = { :git => "https://github.com/rsms/PeerTalk.git", :tag => '0.1.0' }
-    spec.source_files = 'peertalk/*.{h,m}'
+    spec.source_files = 'Sources/peertalk/*.{h,m}'
     spec.ios.deployment_target = '14.0'
     spec.osx.deployment_target = '11.0'
 
