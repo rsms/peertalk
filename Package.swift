@@ -22,9 +22,7 @@ let package = Package(
             name: "Peertalk",
             dependencies: [],
             exclude: [
-                "Info.plist",
-                "Peertalk.h",
-                "PTPrivate.h"
+                "Info.plist"
             ],
             publicHeadersPath: ""),
         .testTarget(

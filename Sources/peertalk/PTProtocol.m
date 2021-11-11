@@ -1,5 +1,5 @@
-#import "PTProtocol.h"
-#import "PTPrivate.h"
+#import "include/PTProtocol.h"
+#import "include/PTPrivate.h"
 #import <objc/runtime.h>
 
 static const uint32_t PTProtocolVersion1 = 1;
