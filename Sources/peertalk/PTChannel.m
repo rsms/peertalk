@@ -1,5 +1,5 @@
-#import "PTChannel.h"
-#import "PTPrivate.h"
+#import "include/PTChannel.h"
+#import "include/PTPrivate.h"
 
 #include <sys/ioctl.h>
 #include <sys/un.h>

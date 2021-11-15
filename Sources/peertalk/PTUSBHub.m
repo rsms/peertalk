@@ -1,5 +1,5 @@
-#import "PTUSBHub.h"
-#import "PTPrivate.h"
+#import "include/PTUSBHub.h"
+#import "include/PTPrivate.h"
 
 #include <netinet/in.h>
 #include <sys/socket.h>

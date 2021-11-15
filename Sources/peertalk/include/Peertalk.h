@@ -6,7 +6,7 @@ FOUNDATION_EXPORT double PeertalkVersionNumber;
 //! Project version string for Peertalk.
 FOUNDATION_EXPORT const unsigned char PeertalkVersionString[];
 
-#import <peertalk/PTChannel.h>
-#import <peertalk/PTDefines.h>
-#import <peertalk/PTProtocol.h>
-#import <peertalk/PTUSBHub.h>
+#import "PTChannel.h"
+#import "PTDefines.h"
+#import "PTProtocol.h"
+#import "PTUSBHub.h"
