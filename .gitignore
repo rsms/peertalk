@@ -13,3 +13,23 @@
 *.diff
 
 xcuserdata
+
+# Created by https://www.toptal.com/developers/gitignore/api/swiftpm
+# Edit at https://www.toptal.com/developers/gitignore?templates=swiftpm
+
+### SwiftPM ###
+Packages
+.build/
+xcuserdata
+DerivedData/
+
+### Xcode Patch ###
+*.xcodeproj/*
+!*.xcodeproj/project.pbxproj
+!*.xcodeproj/xcshareddata/
+!*.xcworkspace/contents.xcworkspacedata
+**/xcshareddata/WorkspaceSettings.xcsettings
+
+
+# End of https://www.toptal.com/developers/gitignore/api/swiftpm
+.swiftpm
