@@ -352,6 +352,7 @@ static NSString *kPlistPacketTypeConnect = @"Connect";
   socklen_t socklen = sizeof(addr);
   if (connect(fd, (struct sockaddr*)&addr, socklen) == -1) {
     if (error) *error = [[NSError alloc] initWithDomain:NSPOSIXErrorDomain code:errno userInfo:nil];
+    close(fd);
     return NO;
   }
   
